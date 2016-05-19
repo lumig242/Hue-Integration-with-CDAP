@@ -18,14 +18,15 @@
 
 from desktop.lib.django_util import render
 from django.http import HttpResponse
-
+from conf import CDAP_API_HOST, CDAP_API_PORT, CDAP_API_VERSION
 
 import urllib2
 import json
 
-BASE_URL = "http://127.0.0.1:10000/v3"
+BASE_URL = "http://{}:{}/{}".format(CDAP_API_HOST.get(), CDAP_API_PORT.get(), CDAP_API_VERSION.get())
 
 def index(request):
+  print BASE_URL
   namespace_url = "/namespaces"
   namespaces = json.loads(urllib2.urlopen(BASE_URL + namespace_url).read())
   # namespaces = [{"name":1}, {"name":2}]
