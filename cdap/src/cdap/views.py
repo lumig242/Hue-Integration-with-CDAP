@@ -23,20 +23,34 @@ from conf import CDAP_API_HOST, CDAP_API_PORT, CDAP_API_VERSION
 import urllib2
 import json
 
-BASE_URL = "http://{}:{}/{}".format(CDAP_API_HOST.get(), CDAP_API_PORT.get(), CDAP_API_VERSION.get())
+#BASE_URL = "http://{}:{}/{}".format(CDAP_API_HOST.get(), CDAP_API_PORT.get(), CDAP_API_VERSION.get())
+BASE_URL = "http://127.0.0.1:10000/v3"
+
+def _call_api(url):
+  return json.loads(urllib2.urlopen(BASE_URL + url).read())
+
 
 def index(request):
-  print BASE_URL
+  print "="*50 + BASE_URL
+  entities = dict()
   namespace_url = "/namespaces"
-  namespaces = json.loads(urllib2.urlopen(BASE_URL + namespace_url).read())
-  # namespaces = [{"name":1}, {"name":2}]
-  return render('index.mako', request, dict(date2="testjson", namespaces=namespaces))
+  stream_url = "/streams"
+  dataset_url = "/data/datasets"
+
+  namespaces = _call_api(namespace_url)
+  entities = {ns.get("name"):dict() for ns in namespaces}
+  for ns in entities:
+    streams = _call_api(namespace_url + "/" + ns + stream_url)
+    entities[ns]["streams"] = [stream.get("name") for stream in streams]
+    datasets = _call_api(namespace_url + "/" + ns + dataset_url)
+    entities[ns]["datasets"] = [dataset.get("name") for dataset in datasets]
+
+  return render('index.mako', request, dict(date2="testjson", entities=entities))
 
 
-def namespaces(request, name):
-  print name
+def namespaces(request, namespace_id):
   try:
-    namespace_info = json.loads(urllib2.urlopen(BASE_URL + "/namespaces/" + name).read())
+    namespace_info = json.loads(urllib2.urlopen(BASE_URL + "/namespaces/" + namespace_id).read())
     return HttpResponse(json.dumps(namespace_info), content_type="application/json")
   except urllib2.HTTPError:
     return HttpResponse("", content_type="application/json")
