@@ -19,5 +19,5 @@ from django.conf.urls import patterns, url
 
 urlpatterns = patterns('cdap',
   url(r'^$', 'views.index'),
-  url(r'^namespaces/(?P<name>.+)/$', 'views.namespaces'),
+  url(r'^details/(?P<path>.+)/$', 'views.details'),
 )
