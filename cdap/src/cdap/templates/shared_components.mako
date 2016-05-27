@@ -16,11 +16,9 @@ def is_selected(section, matcher):
             <li class="currentApp">
               <a href="/cdap">
                 <img src="${ static('cdap/art/icon_cdap_48.png') }" class="app-icon" />
-                Cdap
+                CDAP
               </a>
              </li>
-             <li class="${is_selected(section, 'mytab')}"><a href="#">Tab 1</a></li>
-             <li class="${is_selected(section, 'mytab2')}"><a href="#">Tab 2</a></li>
           </ul>
         </div>
       </div>

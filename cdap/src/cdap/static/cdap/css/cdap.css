@@ -36,5 +36,59 @@
     content:"\e080";
 }
 
+/*
+Customized CSS style
+*/
 
+.acl-heading {
+    margin-top: 0px;
+    padding-top: 0px;
+    word-wrap: break-word;
+}
 
+#jstree {
+    margin-top:5px;
+}
+
+.row-fluid .span8 {
+    width : 48%;
+    height: 100%;
+}
+
+.row-fluid .span4 {
+    width: 48%;
+    height: 100%;
+}
+
+#json-view{
+    width:600px;
+    margin-bottom: 40px;
+}
+
+.jsonview ul li{
+    line-height: 15px;
+}
+
+.acl-panel{
+    border-left: 1px solid #e5e5e5;
+    padding-top: 6px;
+    padding-left: 18px;
+    height: 1000px;
+}
+
+.acl-adding-panel{
+    display: none;
+    width: 50%;
+}
+
+.acl-add-button {
+    padding-right: 88%;
+}
+
+.acl-new {
+    margin-top: 20px;
+}
+
+.acl-management {
+    margin-top: 5px;
+}

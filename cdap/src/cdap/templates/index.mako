@@ -6,47 +6,9 @@ ${shared.menubar(section='mytab')}
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.css">
+<link rel="stylesheet" href="/static/cdap/css/cdap.css">
 
 <style>
-    .acl-heading {
-        margin-top: 0px;
-        padding-top: 0px;
-        word-wrap: break-word;
-    }
-
-    #jstree {
-        margin-top:5px;
-    }
-
-    .row-fluid .span8 {
-        width : 48%;
-        height: 100%;
-    }
-
-    .row-fluid .span4 {
-        width: 48%;
-        height: 100%;
-    }
-
-    #json-view{
-        width:600px;
-    }
-
-    .jsonview ul li{
-        line-height: 15px;
-    }
-
-    .acl-panel{
-        border-left: 1px solid #e5e5e5;
-        padding-top: 6px;
-        padding-left: 18px;
-        height: 1000px;
-    }
-
-    .acl-adding-panel{
-        display: none;
-        width: 50%;
-    }
 
 </style>
 
@@ -108,8 +70,36 @@ ${shared.menubar(section='mytab')}
             <h4 class="acl-heading" id="selected-entity-heading"></h4>
             <div class="acl-description" id="json-view"></div>
             <div class="acl-management">
-                <h4>ACLs</h4>
-                <div class="acl-listing"></div>
+                <span style="padding-left:8px; font-size: large; font-weight:bold;">ACLs</span>
+                <a><div class="acl-add-button pull-right pointer" onclick="newACL()"><i class="fa fa-plus create-acl"></i></div></a>
+                <div class="acl-listing">
+                     <table class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th>Groups</th>
+                            <th>Authorization</th>
+                            <th>Note</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>Group1</td>
+                            <td>r/w</td>
+                            <td></td>
+                          </tr>
+                          <tr>
+                            <td>Group2</td>
+                            <td>w</td>
+                            <td></td>
+                          </tr>
+                          <tr>
+                            <td>Group3</td>
+                            <td>r</td>
+                            <td></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                </div>
                 <div class="acl-new">
                     <p class="acl-adding">
                         <div class="acl-adding-panel">
@@ -136,7 +126,7 @@ ${shared.menubar(section='mytab')}
                                 </label>
                         </div>
                     </p>
-                    <div class="acl-add-button" onclick="newACL()"><i class="fa fa-plus create-acl"></i></div>
+
                 </div>
             </div>
             </div>
