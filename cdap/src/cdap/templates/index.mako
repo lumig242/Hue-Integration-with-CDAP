@@ -78,7 +78,7 @@ ${shared.menubar(section='mytab')}
                           <tr>
                             <th>Groups</th>
                             <th>Authorization</th>
-                            <th>Note</th>
+                            <th>Action</th>
                           </tr>
                         </thead>
                         <tbody>
