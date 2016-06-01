@@ -40,8 +40,9 @@ def index(request):
   global ENTITIES_ALL
   namespace_url = "/namespaces"
   namespaces = _call_cdap_api(namespace_url)
-  entities = {ns.get("name"): dict() for ns in namespaces}
-  ENTITIES_ALL = {ns.get("name"): ns for ns in namespaces}
+  # entities = {ns.get("name"): dict() for ns in namespaces}
+  entities = dict((ns.get("name"), dict()) for ns in namespaces)
+  ENTITIES_ALL = dict((ns.get("name"), ns) for ns in namespaces)
 
   apis = {
     "stream": "/streams",
@@ -67,13 +68,13 @@ def index(request):
               program_dict[program["type"].lower()] = list()
             program_dict[program["type"].lower()].append(program)
           entities[ns][entity_type][item["name"]] = program_dict
-          ENTITIES_ALL[ns][entity_type][item["name"]] = {p_type: {p["name"]: p}
+          ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, dict((p["name"], p)))
                                                          for p_type, programs in program_dict.items()
-                                                         for p in programs}
+                                                         for p in programs)
           ENTITIES_ALL[ns][entity_type][item["name"]].update(item)
       else:
         entities[ns][entity_type] = [item.get("name") for item in items]
-        ENTITIES_ALL[ns][entity_type] = {item.get("name"): item for item in items}
+        ENTITIES_ALL[ns][entity_type] = dict((item.get("name"), item) for item in items)
 
   print entities
   print ENTITIES_ALL
