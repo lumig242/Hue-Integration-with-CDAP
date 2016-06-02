@@ -106,11 +106,7 @@ ${shared.menubar(section='mytab')}
                             <a class="pointer pull-right" style="margin-right: 4px" onclick="closeACL()">
                                 <i class="fa fa-times"></i>
                             </a>
-                              <select name="user-group">
-                                <option value="group1">group1</option>
-                                <option value="group2">group2</option>
-                                <option value="group3">group3</option>
-                                <option value="group4">group4</option>
+                              <select name="user-group" class="user-group">
                                 </select>
                                 <br/>
                             <a class="pointer pull-right" style="margin-right: 4px" onclick="closeACL()">
@@ -160,10 +156,13 @@ ${shared.menubar(section='mytab')}
           $(".acl-description").JSONView(data,{ collapsed: true });
       })
 
-      $.get("/cdap/list_groups" + treeStructString, function(data){
-          $(".acl-listing").JSONView(data,{ collapsed: true });
+      $.get("/cdap/list_roles_by_group" + treeStructString, function(data){
+          for (var i=0; i < data.length; i++){
+              var option = document.createElement("option");
+              option.text = data[i]["name"]
+              $('.user-group').append(option)
+          }
       })
-
   }
 
   function newACL() {

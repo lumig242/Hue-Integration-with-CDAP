@@ -106,8 +106,12 @@ def revoke_privilege(request):
   return
 
 
-def list_groups(request):
+def list_roles_by_group(request):
   sentry_privileges = get_api(request.user, "cdap").list_sentry_roles_by_group()
-  #sentry_privileges = {1:2,3:4}
+  #sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
   print sentry_privileges
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
+
+
+def list_privileges_by_authorizable(request):
+  sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_role("cdap", "testRole1")
