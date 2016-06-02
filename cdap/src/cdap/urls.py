@@ -21,4 +21,5 @@ urlpatterns = patterns('cdap',
   url(r'^$', 'views.index'),
   url(r'^details/(?P<path>.+)/$', 'views.details'),
   url(r'^list_roles_by_group', 'views.list_roles_by_group'),
+  url(r'^list_privileges_by_role', 'views.list_privileges_by_authorizable'),
 )

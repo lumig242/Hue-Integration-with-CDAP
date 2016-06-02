@@ -115,3 +115,5 @@ def list_roles_by_group(request):
 
 def list_privileges_by_authorizable(request):
   sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_role("cdap", "testRole1")
+  print sentry_privileges
+  return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
