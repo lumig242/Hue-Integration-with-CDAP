@@ -159,6 +159,11 @@ ${shared.menubar(section='mytab')}
       $.get("/cdap/details" + treeStructString, function(data){
           $(".acl-description").JSONView(data,{ collapsed: true });
       })
+
+      $.get("/cdap/list_groups" + treeStructString, function(data){
+          $(".acl-listing").JSONView(data,{ collapsed: true });
+      })
+
   }
 
   function newACL() {

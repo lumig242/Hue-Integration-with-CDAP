@@ -20,4 +20,5 @@ from django.conf.urls import patterns, url
 urlpatterns = patterns('cdap',
   url(r'^$', 'views.index'),
   url(r'^details/(?P<path>.+)/$', 'views.details'),
+  url(r'^list_groups$', 'views.list_groups'),
 )

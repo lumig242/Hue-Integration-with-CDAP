@@ -20,6 +20,7 @@ from desktop.lib.django_util import render
 from django.http import HttpResponse
 from cdap.client import auth_client
 from cdap.conf import CDAP_API_HOST, CDAP_API_PORT, CDAP_API_VERSION
+from libsentry.api2 import get_api
 
 import urllib2
 import json
@@ -106,4 +107,7 @@ def revoke_privilege(request):
 
 
 def list_groups(request):
-  return
+  sentry_privileges = get_api(request.user, "cdap").list_sentry_roles_by_group()
+  #sentry_privileges = {1:2,3:4}
+  print sentry_privileges
+  return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
