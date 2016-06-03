@@ -20,6 +20,9 @@ from django.conf.urls import patterns, url
 urlpatterns = patterns('cdap',
   url(r'^$', 'views.index'),
   url(r'^details/(?P<path>.+)/$', 'views.details'),
+  url(r'^authenticate$', 'views.cdap_authenticate'),
   url(r'^list_roles_by_group', 'views.list_roles_by_group'),
   url(r'^list_privileges_by_role', 'views.list_privileges_by_authorizable'),
+  url(r'^grant', 'views.grant_privileges'),
+  #url(r'^list_roles_by_group', 'views.list_roles_by_group'),
 )

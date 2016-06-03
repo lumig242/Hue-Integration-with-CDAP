@@ -19,6 +19,10 @@ ${shared.menubar(section='mytab')}
   <div class="card">
     <h2 class="card-heading simple">Entities</h2>
     <div class="card-body">
+        % if unauthenticated:
+            <h1>You are not authorized!</h1>
+            <p hidden class="is_authenticated">False<p>
+        % else:
         <div class="row-fluid">
 
             <div class="span8">
@@ -129,6 +133,7 @@ ${shared.menubar(section='mytab')}
         </div>
 
         </div>
+        % endif
     </div>
   </div>
 </div>
@@ -176,6 +181,21 @@ ${shared.menubar(section='mytab')}
   };
 
   $(document).ready(function(){
+      if($(".is_authenticated").text()=="False"){
+        var username = prompt("Please enter your username", "");
+          console.log(username);
+        var password = prompt("Please enter your password", "");
+          console.log(password);
+          $.ajax({
+              type: "POST",
+              url: "/cdap/authenticate",
+              data: {"username":username, "password":password},
+              success: function(){
+                  window.location.reload();
+                    },
+            });
+      }
+
       $('#jstree').on('changed.jstree', function (e, data) {
         var r = data.instance.get_node(data.selected[data.selected.length-1])
         entityClicked(r, data);

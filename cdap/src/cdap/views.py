@@ -17,7 +17,7 @@
 
 
 from desktop.lib.django_util import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponse
 from cdap.client import auth_client
 from cdap.conf import CDAP_API_HOST, CDAP_API_PORT, CDAP_API_VERSION
 from libsentry.api2 import get_api
@@ -36,9 +36,16 @@ ENTITIES_ALL = dict()
 def _call_cdap_api(url):
   return CDAP_CLIENT.get(url)
 
+def cdap_authenticate(request):
+  print request.POST["username"]
+  print request.POST["password"]
+  CDAP_CLIENT.set_credentials(request.POST["username"], request.POST["password"])
+  return HttpResponse()
 
 def index(request):
   global ENTITIES_ALL
+  if not CDAP_CLIENT.is_set_credentials:
+    return render('index.mako', request, dict(date2="testjson", unauthenticated=True))
   namespace_url = "/namespaces"
   namespaces = _call_cdap_api(namespace_url)
   # entities = {ns.get("name"): dict() for ns in namespaces}
@@ -69,16 +76,14 @@ def index(request):
               program_dict[program["type"].lower()] = list()
             program_dict[program["type"].lower()].append(program)
           entities[ns][entity_type][item["name"]] = program_dict
-          ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, dict((p["name"], p)))
-                                                         for p_type, programs in program_dict.items()
-                                                         for p in programs)
+          ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, {p["name"]:p})
+                                                             for p_type, programs in program_dict.items()
+                                                             for p in programs)
           ENTITIES_ALL[ns][entity_type][item["name"]].update(item)
       else:
         entities[ns][entity_type] = [item.get("name") for item in items]
         ENTITIES_ALL[ns][entity_type] = dict((item.get("name"), item) for item in items)
 
-  print entities
-  print ENTITIES_ALL
   return render('index.mako', request, dict(date2="testjson", entities=entities))
 
 
@@ -98,7 +103,11 @@ def list_privileges(request, path):
   return
 
 
-def grant_privilege(request):
+def grant_privileges(request):
+  entity_id = request.POST["entity"]
+  actions = request.POST["actions"]
+  role = request.POST["role"]
+  result = get_api(request.user, "cdap").alter_sentry_role_grant_privilege(role)
   return
 
 
