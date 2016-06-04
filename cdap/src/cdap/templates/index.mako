@@ -124,6 +124,18 @@ ${shared.menubar(section='mytab')}
                                     <input type="checkbox" data-bind="checked: r">
                                     Write <span class="muted">(w)</span>
                                 </label>
+                                                                <label class="checkbox inline-block">
+                                    <input type="checkbox" data-bind="checked: r">
+                                    Execute <span class="muted">(x)</span>
+                                </label>
+                                            <label class="checkbox inline-block">
+                                    <input type="checkbox" data-bind="checked: r">
+                                    ADMIN <span class="muted">(admin)</span>
+                                </label>
+                                            <label class="checkbox inline-block">
+                                    <input type="checkbox" data-bind="checked: r">
+                                    All <span class="muted">(all)</span>
+                                </label>
                         </div>
                     </p>
 

@@ -103,6 +103,12 @@ def list_privileges(request, path):
   return
 
 
+def _to_sentry_privilege(user, role, privileges):
+  api = get_api(user)
+  for privilege in privileges:
+    api.alter_sentry_role_grant_privilege(role['name'])
+
+
 def grant_privileges(request):
   entity_id = request.POST["entity"]
   actions = request.POST["actions"]
@@ -122,7 +128,9 @@ def list_roles_by_group(request):
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 
 
-def list_privileges_by_authorizable(request):
-  sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_role("cdap", "testRole1")
+def list_privileges_by_authorizable(request, role):
+  sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_role("cdap", role)
   print sentry_privileges
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
+
+
