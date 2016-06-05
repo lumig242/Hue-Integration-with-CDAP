@@ -134,3 +134,24 @@ def list_privileges_by_authorizable(request, role):
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 
 
+def list_privileges_by_group(request, group):
+  api = get_api(request.user, "cdap")
+  # Fetch all the privileges from sentry first
+  sentry_privileges = api.list_sentry_roles_by_group()
+  #sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
+  print sentry_privileges
+
+  # Construct a dcitionary like {groupname:[role1,role2,role3]}
+  reverse_group_role_dict = dict()
+  for item in sentry_privileges:
+    role_name = item["name"]
+    for g in item["groups"]:
+      if g not in reverse_group_role_dict:
+        reverse_group_role_dict[g] = []
+      reverse_group_role_dict[g].append(role_name)
+
+  response = []
+  if group in reverse_group_role_dict:
+    for role in reverse_group_role_dict[group]:
+      response += api.list_sentry_privileges_by_role("cdap", role)
+  return HttpResponse(json.dumps(response), content_type="application/json")
