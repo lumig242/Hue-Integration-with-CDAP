@@ -26,6 +26,8 @@ import urllib2
 import json
 import logging
 
+from collections import defaultdict
+
 LOG = logging.getLogger(__name__)
 # BASE_URL = "http://{}:{}/{}".format(CDAP_API_HOST.get(), CDAP_API_PORT.get(), CDAP_API_VERSION.get())
 BASE_URL = "http://rohit9692-1000.dev.continuuity.net:10000/v3"
@@ -92,10 +94,20 @@ def details(request, path):
   for k in path.strip("/").split("/"):
     item = item[k]
   namespace = path.strip("/").split("/")[0]
-  if namespace == "rohit":
-    privileges = [{"role":".namespace:rohit", "actions":"All"}]
-  else:
-    privileges = []
+
+  # TODO: Only deals with namespaces now
+  api = get_api(request.user, "cdap")
+  # Fetch all the privileges from sentry first
+  roles = [item["name"] for item in api.list_sentry_roles_by_group()]
+  privileges = []
+
+  for role in roles:
+    sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
+    authorizables = defaultdict(list)
+    for auth in sentry_privilege["authorizables"]:
+      if auth["type"] == "NAMESPACE" and auth["name"] == namespace:
+        privileges.append({"role":role, "actions":sentry_privilege["action"]})
+
   item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
 
