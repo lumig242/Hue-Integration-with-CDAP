@@ -103,10 +103,10 @@ def details(request, path):
 
   for role in roles:
     sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
-    authorizables = defaultdict(list)
-    for auth in sentry_privilege["authorizables"]:
-      if auth["type"] == "NAMESPACE" and auth["name"] == namespace:
-        privileges.append({"role":role, "actions":sentry_privilege["action"]})
+    for privilege in sentry_privilege:
+      for auth in privilege["authorizables"]:
+        if auth["type"] == "NAMESPACE" and auth["name"] == namespace:
+          privileges.append({"role":role, "actions":sentry_privilege["action"]})
 
   item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
@@ -139,7 +139,7 @@ def revoke_privilege(request):
   return
 
 
-def git(request):
+def list_roles_by_group(request):
   sentry_privileges = get_api(request.user, "cdap").list_sentry_roles_by_group()
   #sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
   print sentry_privileges
