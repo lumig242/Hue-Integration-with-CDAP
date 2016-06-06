@@ -127,7 +127,7 @@ def revoke_privilege(request):
   return
 
 
-def list_roles_by_group(request):
+def git(request):
   sentry_privileges = get_api(request.user, "cdap").list_sentry_roles_by_group()
   #sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
   print sentry_privileges
