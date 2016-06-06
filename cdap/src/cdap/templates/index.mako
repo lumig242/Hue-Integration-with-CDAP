@@ -200,10 +200,10 @@ ${shared.menubar(section='mytab')}
       })
 
       $.get("/cdap/list_roles_by_group" + treeStructString, function(data){
+          $('.user-group').empty();
           for (var i=0; i < data.length; i++){
               var option = document.createElement("option");
               option.text = data[i]["name"];
-              $('.user-group').empty();
               $('.user-group').append(option);
           }
       })
