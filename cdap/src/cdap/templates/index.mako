@@ -48,11 +48,11 @@ ${shared.menubar(section='mytab')}
             <div id="jstree">
      <ul>
         <li> Namespaces
-        % for name, namespace in entities.items():
+        % for name, namespace in entities.iteritems():
         <ul>
           <li>${name}
             <ul>
-                % for key, value in namespace.items():
+                % for key, value in namespace.iteritems():
                     % if value:
                         <li> ${key[0].upper() + key[1:]}
                             <ul>
@@ -61,7 +61,7 @@ ${shared.menubar(section='mytab')}
                                     <li class="card-info"> ${item} </li>
                                     % else:
                                         <li class="card-info"> ${item}<ul>
-                                        % for application_type, apps in value[item].items():
+                                        % for application_type, apps in value[item].iteritems():
                                             <li> ${application_type[0].upper() + application_type[1:]}
                                             <ul>
                                                 % for app in apps:
@@ -99,25 +99,15 @@ ${shared.menubar(section='mytab')}
                      <table class="table table-striped">
                         <thead>
                           <tr>
-                            <th>Groups</th>
+                            <th>Role</th>
                             <th>Authorization</th>
                             <th>Action</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="acl-table-body">
                           <tr>
-                            <td>Group1</td>
-                            <td>r/w</td>
                             <td></td>
-                          </tr>
-                          <tr>
-                            <td>Group2</td>
-                            <td>w</td>
                             <td></td>
-                          </tr>
-                          <tr>
-                            <td>Group3</td>
-                            <td>r</td>
                             <td></td>
                           </tr>
                         </tbody>
@@ -196,7 +186,14 @@ ${shared.menubar(section='mytab')}
       $('.acl-heading').html(treeStructString.substring(1, treeStructString.length));
 
       $.get("/cdap/details" + treeStructString, function(data){
+          $("#acl-table-body").empty();
           $(".acl-description").JSONView(data,{ collapsed: true });
+          privileges = data["privileges"];
+          for(var i = 0; i < privileges.length; i++){
+              var p = privileges[i];
+              console.log(p);
+            $("#acl-table-body").append("<tr><td>"+ p["role"] + "</td><td></td><td>" + p["actions"] + "</td></tr>");
+          }
       })
 
       $.get("/cdap/list_roles_by_group" + treeStructString, function(data){
@@ -211,7 +208,6 @@ ${shared.menubar(section='mytab')}
 
   $('.btn-list-by-group').bind('input', function() {
       $.get("/cdap/list_privileges_by_group/" + $(this).val(), function(data){
-          console.log(data);
           $(".json-list-by-group").JSONView(data);
       })
 });

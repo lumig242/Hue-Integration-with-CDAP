@@ -60,7 +60,7 @@ def index(request):
   }
 
   for ns in entities:
-    for entity_type, entity_url in apis.items():
+    for entity_type, entity_url in apis.iteritems():
       full_url = namespace_url + "/" + ns + entity_url
       items = _call_cdap_api(full_url)
 
@@ -77,7 +77,7 @@ def index(request):
             program_dict[program["type"].lower()].append(program)
           entities[ns][entity_type][item["name"]] = program_dict
           ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, {p["name"]:p})
-                                                             for p_type, programs in program_dict.items()
+                                                             for p_type, programs in program_dict.iteritems()
                                                              for p in programs)
           ENTITIES_ALL[ns][entity_type][item["name"]].update(item)
       else:
@@ -91,7 +91,13 @@ def details(request, path):
   item = ENTITIES_ALL
   for k in path.strip("/").split("/"):
     item = item[k]
-  return HttpResponse(json.dumps(item).replace("\n", ""), content_type="application/json")
+  namespace = path.strip("/").split("/")[0]
+  if namespace == "rohit":
+    privileges = [{"role":".namespace:rohit", "actions":"All"}]
+  else:
+    privileges = []
+  item["privileges"] = privileges
+  return HttpResponse(json.dumps(item), content_type="application/json")
 
 
 def list_privileges(request, path):
