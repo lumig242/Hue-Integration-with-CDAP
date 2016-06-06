@@ -15,6 +15,25 @@ ${shared.menubar(section='mytab')}
 ## Use double hashes for a mako template comment
 ## Main body
 
+<div class="modal fade" id="popup" role="dialog">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+      <h4 class="modal-title">Login to secure cdap cluster</h4>
+    </div>
+    <div class="modal-body">
+        <label for="cdap_username">Name:</label>
+      <input id="cdap_username" type="text"/>
+        <label for="cdap_password">Password:</label>
+        <input id="cdap_password" type="password"/>
+    </div>
+    <div class="modal-footer">
+      <button onclick="cdap_submit()" type="button" class="btn btn-default" data-dismiss="modal">Login</button>
+    </div>
+
+
+
+</div>
+
 <div class="container-fluid">
   <div class="card">
     <h2 class="card-heading simple">Entities</h2>
@@ -183,8 +202,9 @@ ${shared.menubar(section='mytab')}
       $.get("/cdap/list_roles_by_group" + treeStructString, function(data){
           for (var i=0; i < data.length; i++){
               var option = document.createElement("option");
-              option.text = data[i]["name"]
-              $('.user-group').append(option)
+              option.text = data[i]["name"];
+              $('.user-group').empty();
+              $('.user-group').append(option);
           }
       })
   }
@@ -206,20 +226,22 @@ ${shared.menubar(section='mytab')}
       $('.acl-add-button').show();
   };
 
+  function cdap_submit(){
+      var username = $("#cdap_username").val();
+      var password = $("#cdap_password").val();
+      $.ajax({
+      type: "POST",
+      url: "/cdap/authenticate",
+      data: {"username":username, "password":password},
+      success: function(){
+          window.location.reload();
+            },
+    });
+  }
+
   $(document).ready(function(){
       if($(".is_authenticated").text()=="False"){
-        var username = prompt("Please enter your username", "");
-          console.log(username);
-        var password = prompt("Please enter your password", "");
-          console.log(password);
-          $.ajax({
-              type: "POST",
-              url: "/cdap/authenticate",
-              data: {"username":username, "password":password},
-              success: function(){
-                  window.location.reload();
-                    },
-            });
+        $("#popup").modal();
       }
 
       $('#jstree').on('changed.jstree', function (e, data) {

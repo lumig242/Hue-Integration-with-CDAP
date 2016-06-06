@@ -13,7 +13,11 @@ class auth_client:
   def set_credentials(self, username, password):
     self._cdap_username = username
     self._cdap_password = password
-    self.is_set_credentials = True
+    try:
+      self.get("/namespaces")
+      self.is_set_credentials = True
+    except:
+      pass
 
   def get_token(self, auth_uri):
     return json.loads(requests.get(auth_uri, auth=(self._cdap_username, self._cdap_password)).content)
