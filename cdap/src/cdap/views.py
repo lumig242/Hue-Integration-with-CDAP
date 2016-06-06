@@ -128,7 +128,7 @@ def list_roles_by_group(request):
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 
 
-def list_privileges_by_authorizable(request, role):
+def list_privileges_by_role(request, role):
   sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_role("cdap", role)
   print sentry_privileges
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
@@ -155,3 +155,10 @@ def list_privileges_by_group(request, group):
     for role in reverse_group_role_dict[group]:
       response += api.list_sentry_privileges_by_role("cdap", role)
   return HttpResponse(json.dumps(response), content_type="application/json")
+
+
+def list_privileges_by_authorizable(request):
+  # This is a test
+  authorizableSet = [{"authorizables":[{"type":"NAMESPACE", "name":"rohit"}]}]
+  sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_authorizable("cdap", authorizableSet)
+  return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
