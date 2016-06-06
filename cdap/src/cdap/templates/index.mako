@@ -141,6 +141,13 @@ ${shared.menubar(section='mytab')}
 
                 </div>
             </div>
+
+            <div class="list-by-group">
+                <br/git ad>
+                <h4>List privileges by group</h4>
+                <input class="btn-list-by-group"></input>
+                <div class="json-list-by-group" id="json-view"></div>
+                <div>
             </div>
         </div>
 
@@ -181,6 +188,13 @@ ${shared.menubar(section='mytab')}
           }
       })
   }
+
+  $('.btn-list-by-group').bind('input', function() {
+      $.get("/cdap/list_privileges_by_group/" + $(this).val(), function(data){
+          console.log(data);
+          $(".json-list-by-group").JSONView(data);
+      })
+});
 
   function newACL() {
       $('.acl-adding-panel').show();
