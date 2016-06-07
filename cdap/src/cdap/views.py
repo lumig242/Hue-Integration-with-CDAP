@@ -109,7 +109,7 @@ def details(request, path):
     for privilege in sentry_privilege:
       if _match_authorizables(privilege["authorizables"], path):
         if role not in privileges:
-          privileges[role] = defaultdict(set)
+          privileges[role] = defaultdict(list)
         privileges[role]["actions"].append(privilege["action"])
 
   item["privileges"] = privileges
@@ -134,8 +134,12 @@ def _path_to_sentry_authorizables(path):
   return authorizables
 
 def grant_privileges(request):
-  tSentryPrivilege = _to_sentry_privilege("ALL")
-  result = get_api(request.user, "cdap").alter_sentry_role_grant_privilege("testrole2", tSentryPrivilege)
+  role = request.POST["role"]
+  actions = request.POST["actions"]
+  authorizables = _path_to_sentry_authorizables(request.POST["path"])
+  for action in actions:
+    tSentryPrivilege = _to_sentry_privilege(action, authorizables)
+    result = get_api(request.user, "cdap").alter_sentry_role_grant_privilege(role, tSentryPrivilege)
   return HttpResponse()
 
 

@@ -122,29 +122,30 @@ ${shared.menubar(section='mytab')}
                               <select name="user-group" class="user-group">
                                 </select>
                                 <br/>
-                            <a class="pointer pull-right" style="margin-right: 4px" onclick="closeACL()">
+                            <a class="pointer pull-right" style="margin-right: 4px" onclick="saveACL()">
                                 <i class="fa fa-check"></i>
                             </a>
                                 <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: read" value="read">
                                     Read <span class="muted">(r)</span>
                                 </label>
                                 <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: write" value="write">
                                     Write <span class="muted">(w)</span>
                                 </label>
                                                                 <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: execute" value="execute">
                                     Execute <span class="muted">(x)</span>
                                 </label>
                                             <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: admin" value="admin">
                                     ADMIN <span class="muted">(admin)</span>
                                 </label>
                                             <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: all" value="all">
                                     All <span class="muted">(all)</span>
                                 </label>
+
                         </div>
                     </p>
 
@@ -183,7 +184,11 @@ ${shared.menubar(section='mytab')}
           }
           treeStructString = "/" + parentText + treeStructString;
       }
-      $('.acl-heading').html(treeStructString.substring(1, treeStructString.length));
+        refresfDetail(treeStructString);
+  }
+
+  function refresfDetail(treeStructString){
+            $('.acl-heading').html(treeStructString.substring(1, treeStructString.length));
 
       $.get("/cdap/details" + treeStructString, function(data){
           $("#acl-table-body").empty();
@@ -219,6 +224,25 @@ ${shared.menubar(section='mytab')}
       $('.acl-adding-panel').hide();
       $('.acl-add-button').show();
   };
+
+  function saveACL() {
+      var role = $(".user-group").find(":selected").text();
+      var path = $(".acl-heading").text();
+      var actions = [];
+      var checked = $( "input:checked" )
+      for(var i = 0; i < checked.length; i++ ){
+          console.log(checked[i].value);
+          actions.push(checked[i].value);
+      }
+            $.ajax({
+      type: "POST",
+      url: "/cdap/grant",
+      data: {"role":role, "actions":actions, "path":path},
+      success: function(){
+            refresfDetail(path);
+            },
+    });
+  }
 
   function cdap_submit(){
       var username = $("#cdap_username").val();
