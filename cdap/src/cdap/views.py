@@ -89,66 +89,59 @@ def index(request):
   return render('index.mako', request, dict(date2="testjson", entities=entities))
 
 
+def _match_authorizables(authorizables, path):
+  i = 0
+  for auth in authorizables:
+    if i >= len(path):
+      return False
+    if auth["type"].lower() != path[i].lower() or \
+      auth["name"].lower() != path[i+1].lower():
+      return False
+    i += 2
+  return True
+
 def details(request, path):
   item = ENTITIES_ALL
   for k in path.strip("/").split("/"):
     item = item[k]
-  namespace = path.strip("/").split("/")[0]
-  entity = path.strip("/").split("/")[1:]
 
-  # TODO: Only deals with namespaces now
   api = get_api(request.user, "cdap")
   # Fetch all the privileges from sentry first
-  roles = [item["name"] for item in api.list_sentry_roles_by_group()]
+  roles = [result["name"] for result in api.list_sentry_roles_by_group()]
   privileges = []
+
+  # Construct the full path for security
+  path = path.strip("/").split("/")
+  path = ["instance","cdap","namespace"] + path
 
   for role in roles:
     sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
     for privilege in sentry_privilege:
       for auth in privilege["authorizables"]:
-        if auth["type"] == "NAMESPACE" and auth["name"] == namespace:
+        if _match_authorizables(auth, path):
           privileges.append({"role":role, "actions":privilege["action"]})
-        for i in xrange(0, len(entity), 2):
-          if auth["type"] == entity[i].upper() and auth["name"] == entity[i+1]:
-            privileges.append({"role": role, "actions": privilege["action"]})
 
   item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
 
 
-def list_privileges(request, path):
-  try:
-    # TODO: Use this path to retrieve all the privileges
-    path.strip("/").split("/")
-  except Exception as e:
-    LOG.exception("could not retrieve roles")
-  return
-
-
-def _to_sentry_privilege(user, role, privileges):
-  api = get_api(user)
-  for privilege in privileges:
-    api.alter_sentry_role_grant_privilege(role['name'])
+def _to_sentry_privilege(action):
+  return {
+    "component": "cdap",
+    "serviceName": "cdap",
+    "authorizables": [{"type": "INSTANCE", "name": "cdap"}, {"type": "NAMESPACE", "name": "demospace"}, {"type": "STREAM", "name": "purchasestream"}],
+    "action": action,
+  }
 
 
 def grant_privileges(request):
-  tSentryPrivilege = {
-    "component": "cdap",
-    "serviceName": "cdap",
-    "authorizables": [{"type":"NAMESPACE", "name":"demoSpace"}],
-    "action": "ALL",
-  }
+  tSentryPrivilege = _to_sentry_privilege("ALL")
   result = get_api(request.user, "cdap").alter_sentry_role_grant_privilege("testrole2", tSentryPrivilege)
   return HttpResponse()
 
 
 def revoke_privileges(request):
-  tSentryPrivilege = {
-    "component": "cdap",
-    "serviceName": "cdap",
-    "authorizables": [{"type": "NAMESPACE", "name": "demoSpace"}],
-    "action": "ALL",
-  }
+  tSentryPrivilege = _to_sentry_privilege("ALL")
   result = get_api(request.user, "cdap").alter_sentry_role_revoke_privilege("testrole2", tSentryPrivilege)
   return HttpResponse()
 
