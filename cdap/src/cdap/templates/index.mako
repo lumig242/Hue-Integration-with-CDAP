@@ -246,9 +246,9 @@ ${shared.menubar(section='mytab')}
   })
 
       // Temp: expand all
-      $('#jstree').on('loaded.jstree', function () {
-       $('#jstree').jstree('open_all');
-  })
+     // $('#jstree').on('loaded.jstree', function () {
+    //   $('#jstree').jstree('open_all');
+  //})
 
       $('#jstree').jstree(
             {"core" : {

@@ -94,6 +94,7 @@ def details(request, path):
   for k in path.strip("/").split("/"):
     item = item[k]
   namespace = path.strip("/").split("/")[0]
+  entity = path.strip("/").split("/")[1:]
 
   # TODO: Only deals with namespaces now
   api = get_api(request.user, "cdap")
@@ -106,7 +107,10 @@ def details(request, path):
     for privilege in sentry_privilege:
       for auth in privilege["authorizables"]:
         if auth["type"] == "NAMESPACE" and auth["name"] == namespace:
-          privileges.append({"role":role, "actions":sentry_privilege["action"]})
+          privileges.append({"role":role, "actions":privilege["action"]})
+        for i in xrange(0, len(entity), 2):
+          if auth["type"] == entity[i].upper() and auth["name"] == entity[i+1]:
+            privileges.append({"role": role, "actions": privilege["action"]})
 
   item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
