@@ -101,14 +101,17 @@ ${shared.menubar(section='mytab')}
                           <tr>
                             <th>Role</th>
                             <th>Action</th>
-                            <th>Authorization</th>
+                            <th>Operation</th>
                           </tr>
                         </thead>
                         <tbody id="acl-table-body">
                           <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td>role</td>
+                            <td><span class="read">read</span></td>
+                            <td>
+                                <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true"></i></a>
+                                <a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a>
+                            </td>
                           </tr>
                         </tbody>
                       </table>
@@ -224,6 +227,23 @@ ${shared.menubar(section='mytab')}
       $('.acl-adding-panel').hide();
       $('.acl-add-button').show();
   };
+
+  function delACL(element) {
+      var tds = element.parentElement.parentElement.parentElement.children;
+      var role = tds[0].textContent;
+      var actions = tds[1].textContent.split(",");
+      var path = $(".acl-heading").text();
+      console.log(role);
+      console.log(actions);
+      $.ajax({
+      type: "POST",
+      url: "/cdap/revoke",
+      data: {"role":role, "actions":actions, "path":path},
+      success: function(){
+            refresfDetail("/" + path);
+            },
+        });
+  }
 
   function saveACL() {
       var role = $(".user-group").find(":selected").text();
