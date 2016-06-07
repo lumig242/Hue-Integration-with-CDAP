@@ -115,8 +115,8 @@ ${shared.menubar(section='mytab')}
                 </div>
                 <div class="acl-new">
                     <p class="acl-adding">
-                        <div class="acl-adding-header"><h4>New ACL</h4></div>
                         <div class="acl-adding-panel">
+                            <div class="acl-adding-header"><h4>New ACL</h4></div>
                             <a class="pointer pull-right" style="margin-right: 4px" onclick="closeACL()">
                                 <i class="fa fa-times"></i>
                             </a>
