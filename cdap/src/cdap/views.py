@@ -135,7 +135,13 @@ def grant_privileges(request):
   entity_id = request.POST["entity"]
   actions = request.POST["actions"]
   role = request.POST["role"]
-  result = get_api(request.user, "cdap").alter_sentry_role_grant_privilege(role)
+  tSentryPrivilege = {
+    "component": "cdap",
+    "serviceName": "cdap",
+    "authorizables": [{"type":"NAMESPACE", "name":"demoSpace"}],
+    "action": "ALL",
+  }
+  result = get_api(request.user, "cdap").alter_sentry_role_grant_privilege(role, tSentryPrivilege)
   return
 
 
