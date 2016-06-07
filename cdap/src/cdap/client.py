@@ -6,9 +6,9 @@ class auth_client:
   def __init__(self, host_url="0.0.0.0:10000/v3"):
     self.host_url = host_url
     self.auth_header = None
-    self._cdap_username = None
-    self._cdap_password = None
-    self.is_set_credentials = False
+    self._cdap_username = "shenggu"
+    self._cdap_password = "udxc2knu"
+    self.is_set_credentials = True
 
   def set_credentials(self, username, password):
     self._cdap_username = username

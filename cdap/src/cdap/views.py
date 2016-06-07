@@ -26,6 +26,8 @@ import urllib2
 import json
 import logging
 
+from collections import defaultdict
+
 LOG = logging.getLogger(__name__)
 # BASE_URL = "http://{}:{}/{}".format(CDAP_API_HOST.get(), CDAP_API_PORT.get(), CDAP_API_VERSION.get())
 BASE_URL = "http://rohit9692-1000.dev.continuuity.net:10000/v3"
@@ -87,47 +89,71 @@ def index(request):
   return render('index.mako', request, dict(date2="testjson", entities=entities))
 
 
+def _match_authorizables(authorizables, path):
+  return True if path[:len(authorizables)] == authorizables else False
+
 def details(request, path):
   item = ENTITIES_ALL
   for k in path.strip("/").split("/"):
     item = item[k]
-  namespace = path.strip("/").split("/")[0]
-  if namespace == "rohit":
-    privileges = [{"role":".namespace:rohit", "actions":"All"}]
-  else:
-    privileges = []
+
+  api = get_api(request.user, "cdap")
+  # Fetch all the privileges from sentry first
+  roles = [result["name"] for result in api.list_sentry_roles_by_group()]
+  privileges = {}
+
+  path = _path_to_sentry_authorizables(path)
+
+  for role in roles:
+    sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
+    for privilege in sentry_privilege:
+      if _match_authorizables(privilege["authorizables"], path):
+        if role not in privileges:
+          privileges[role] = defaultdict(list)
+        privileges[role]["actions"].append(privilege["action"])
+
   item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
 
 
-def list_privileges(request, path):
-  try:
-    # TODO: Use this path to retrieve all the privileges
-    path.strip("/").split("/")
-  except Exception as e:
-    LOG.exception("could not retrieve roles")
-  return
+def _to_sentry_privilege(action, authorizables):
+  return {
+    "component": "cdap",
+    "serviceName": "cdap",
+    "authorizables": authorizables,
+    "action": action,
+  }
 
 
-def _to_sentry_privilege(user, role, privileges):
-  api = get_api(user)
-  for privilege in privileges:
-    api.alter_sentry_role_grant_privilege(role['name'])
-
+def _path_to_sentry_authorizables(path):
+  path = path.strip("/").split("/")
+  path = ["instance", "cdap", "namespace"] + path
+  authorizables = list()
+  for i in xrange(0, len(path), 2):
+    authorizables.append({"type":path[i].upper(), "name":path[i+1].lower()})
+  return authorizables
 
 def grant_privileges(request):
-  entity_id = request.POST["entity"]
-  actions = request.POST["actions"]
   role = request.POST["role"]
-  result = get_api(request.user, "cdap").alter_sentry_role_grant_privilege(role)
-  return
+  actions = request.POST.getlist("actions[]")
+  authorizables = _path_to_sentry_authorizables(request.POST["path"])
+  for action in actions:
+    tSentryPrivilege = _to_sentry_privilege(action, authorizables)
+    result = get_api(request.user, "cdap").alter_sentry_role_grant_privilege(role, tSentryPrivilege)
+  return HttpResponse()
 
 
-def revoke_privilege(request):
-  return
+def revoke_privileges(request):
+  role = request.POST["role"]
+  actions = request.POST.getlist("actions[]")
+  authorizables = _path_to_sentry_authorizables(request.POST["path"])
+  for action in actions:
+    tSentryPrivilege = _to_sentry_privilege(action, authorizables)
+    result = get_api(request.user, "cdap").alter_sentry_role_revoke_privilege(role, tSentryPrivilege)
+  return HttpResponse()
 
 
-def git(request):
+def list_roles_by_group(request):
   sentry_privileges = get_api(request.user, "cdap").list_sentry_roles_by_group()
   #sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
   print sentry_privileges

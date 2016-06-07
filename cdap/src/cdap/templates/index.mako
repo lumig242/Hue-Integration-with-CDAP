@@ -100,8 +100,8 @@ ${shared.menubar(section='mytab')}
                         <thead>
                           <tr>
                             <th>Role</th>
-                            <th>Authorization</th>
                             <th>Action</th>
+                            <th>Authorization</th>
                           </tr>
                         </thead>
                         <tbody id="acl-table-body">
@@ -116,35 +116,37 @@ ${shared.menubar(section='mytab')}
                 <div class="acl-new">
                     <p class="acl-adding">
                         <div class="acl-adding-panel">
+                            <div class="acl-adding-header"><h4>New ACL</h4></div>
                             <a class="pointer pull-right" style="margin-right: 4px" onclick="closeACL()">
                                 <i class="fa fa-times"></i>
                             </a>
                               <select name="user-group" class="user-group">
                                 </select>
                                 <br/>
-                            <a class="pointer pull-right" style="margin-right: 4px" onclick="closeACL()">
+                            <a class="pointer pull-right" style="margin-right: 4px" onclick="saveACL()">
                                 <i class="fa fa-check"></i>
                             </a>
                                 <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: read" value="read">
                                     Read <span class="muted">(r)</span>
                                 </label>
                                 <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: write" value="write">
                                     Write <span class="muted">(w)</span>
                                 </label>
                                                                 <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: execute" value="execute">
                                     Execute <span class="muted">(x)</span>
                                 </label>
                                             <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: admin" value="admin">
                                     ADMIN <span class="muted">(admin)</span>
                                 </label>
                                             <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: r">
+                                    <input type="checkbox" data-bind="checked: all" value="all">
                                     All <span class="muted">(all)</span>
                                 </label>
+
                         </div>
                     </p>
 
@@ -152,7 +154,7 @@ ${shared.menubar(section='mytab')}
             </div>
 
             <div class="list-by-group">
-                <br/git ad>
+                <br/>
                 <h4>List privileges by group</h4>
                 <input class="btn-list-by-group"></input>
                 <div class="json-list-by-group" id="json-view"></div>
@@ -184,15 +186,16 @@ ${shared.menubar(section='mytab')}
           treeStructString = "/" + parentText + treeStructString;
       }
       $('.acl-heading').html(treeStructString.substring(1, treeStructString.length));
+      refresfDetail(treeStructString);
+  }
 
+  function refresfDetail(treeStructString){
       $.get("/cdap/details" + treeStructString, function(data){
           $("#acl-table-body").empty();
           $(".acl-description").JSONView(data,{ collapsed: true });
           privileges = data["privileges"];
-          for(var i = 0; i < privileges.length; i++){
-              var p = privileges[i];
-              console.log(p);
-            $("#acl-table-body").append("<tr><td>"+ p["role"] + "</td><td></td><td>" + p["actions"] + "</td></tr>");
+          for(var role in privileges){
+            $("#acl-table-body").append("<tr><td>"+ role + "</td><td>" + privileges[role]["actions"].join(",") + "</td><td></td></tr>");
           }
       })
 
@@ -222,6 +225,26 @@ ${shared.menubar(section='mytab')}
       $('.acl-add-button').show();
   };
 
+  function saveACL() {
+      var role = $(".user-group").find(":selected").text();
+      var path = $(".acl-heading").text();
+      var actions = [];
+      var checked = $( "input:checked" )
+      for(var i = 0; i < checked.length; i++ ){
+          console.log(checked[i].value);
+          actions.push(checked[i].value);
+      }
+      $.ajax({
+      type: "POST",
+      url: "/cdap/grant",
+      data: {"role":role, "actions":actions, "path":path},
+      success: function(){
+            refresfDetail("/" + path);
+            },
+        });
+      closeACL();
+  }
+
   function cdap_submit(){
       var username = $("#cdap_username").val();
       var password = $("#cdap_password").val();
@@ -246,9 +269,9 @@ ${shared.menubar(section='mytab')}
   })
 
       // Temp: expand all
-      $('#jstree').on('loaded.jstree', function () {
-       $('#jstree').jstree('open_all');
-  })
+     // $('#jstree').on('loaded.jstree', function () {
+    //   $('#jstree').jstree('open_all');
+  //})
 
       $('#jstree').jstree(
             {"core" : {

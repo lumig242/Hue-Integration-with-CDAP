@@ -251,7 +251,7 @@ def _get_server_properties():
   if not _api_cache: # If we need to refresh the list or if previously no servers were up 
     _api_cache_lock.acquire()
 
-     try:
+    try:
       if not _api_cache:
 
         servers = []
