@@ -90,15 +90,7 @@ def index(request):
 
 
 def _match_authorizables(authorizables, path):
-  i = 0
-  for auth in authorizables:
-    if i >= len(path):
-      return False
-    if auth["type"].lower() != path[i].lower() or \
-      auth["name"].lower() != path[i+1].lower():
-      return False
-    i += 2
-  return True
+  return True if path[:len(authorizables)] == authorizables else False
 
 def details(request, path):
   item = ENTITIES_ALL
@@ -108,31 +100,38 @@ def details(request, path):
   api = get_api(request.user, "cdap")
   # Fetch all the privileges from sentry first
   roles = [result["name"] for result in api.list_sentry_roles_by_group()]
-  privileges = []
+  privileges = {}
 
-  # Construct the full path for security
-  path = path.strip("/").split("/")
-  path = ["instance","cdap","namespace"] + path
+  path = _path_to_sentry_authorizables(path)
 
   for role in roles:
     sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
     for privilege in sentry_privilege:
-      for auth in privilege["authorizables"]:
-        if _match_authorizables(auth, path):
-          privileges.append({"role":role, "actions":privilege["action"]})
+      if _match_authorizables(privilege["authorizables"], path):
+        if role not in privileges:
+          privileges[role] = defaultdict(set)
+        privileges[role]["actions"].append(privilege["action"])
 
   item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
 
 
-def _to_sentry_privilege(action):
+def _to_sentry_privilege(action, authorizables):
   return {
     "component": "cdap",
     "serviceName": "cdap",
-    "authorizables": [{"type": "INSTANCE", "name": "cdap"}, {"type": "NAMESPACE", "name": "demospace"}, {"type": "STREAM", "name": "purchasestream"}],
+    "authorizables": authorizables,
     "action": action,
   }
 
+
+def _path_to_sentry_authorizables(path):
+  path = path.strip("/").split("/")
+  path = ["instance", "cdap", "namespace"] + path
+  authorizables = list()
+  for i in xrange(0, len(path), 2):
+    authorizables.append({"type":path[i].upper(), "name":path[i+1].lower()})
+  return authorizables
 
 def grant_privileges(request):
   tSentryPrivilege = _to_sentry_privilege("ALL")

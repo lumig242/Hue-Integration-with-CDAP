@@ -189,10 +189,8 @@ ${shared.menubar(section='mytab')}
           $("#acl-table-body").empty();
           $(".acl-description").JSONView(data,{ collapsed: true });
           privileges = data["privileges"];
-          for(var i = 0; i < privileges.length; i++){
-              var p = privileges[i];
-              console.log(p);
-            $("#acl-table-body").append("<tr><td>"+ p["role"] + "</td><td></td><td>" + p["actions"] + "</td></tr>");
+          for(var role in privileges){
+            $("#acl-table-body").append("<tr><td>"+ role + "</td><td></td><td>" + privileges[role]["actions"].join(",") + "</td></tr>");
           }
       })
 
