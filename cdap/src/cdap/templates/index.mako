@@ -184,12 +184,11 @@ ${shared.menubar(section='mytab')}
           }
           treeStructString = "/" + parentText + treeStructString;
       }
-        refresfDetail(treeStructString);
+      $('.acl-heading').html(treeStructString.substring(1, treeStructString.length));
+      refresfDetail(treeStructString);
   }
 
   function refresfDetail(treeStructString){
-            $('.acl-heading').html(treeStructString.substring(1, treeStructString.length));
-
       $.get("/cdap/details" + treeStructString, function(data){
           $("#acl-table-body").empty();
           $(".acl-description").JSONView(data,{ collapsed: true });

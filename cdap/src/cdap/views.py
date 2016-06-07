@@ -135,7 +135,7 @@ def _path_to_sentry_authorizables(path):
 
 def grant_privileges(request):
   role = request.POST["role"]
-  actions = request.POST["actions"]
+  actions = request.POST.getlist("actions[]")
   authorizables = _path_to_sentry_authorizables(request.POST["path"])
   for action in actions:
     tSentryPrivilege = _to_sentry_privilege(action, authorizables)
@@ -144,8 +144,12 @@ def grant_privileges(request):
 
 
 def revoke_privileges(request):
-  tSentryPrivilege = _to_sentry_privilege("ALL")
-  result = get_api(request.user, "cdap").alter_sentry_role_revoke_privilege("testrole2", tSentryPrivilege)
+  role = request.POST["role"]
+  actions = request.POST.getlist("actions[]")
+  authorizables = _path_to_sentry_authorizables(request.POST["path"])
+  for action in actions:
+    tSentryPrivilege = _to_sentry_privilege(action, authorizables)
+    result = get_api(request.user, "cdap").alter_sentry_role_revoke_privilege(role, tSentryPrivilege)
   return HttpResponse()
 
 
