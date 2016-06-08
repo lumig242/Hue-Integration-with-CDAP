@@ -148,44 +148,6 @@ ${shared.menubar(section='mytab')}
                         </tbody>
                       </table>
                 </div>
-                <div class="acl-new">
-                    <p class="acl-adding">
-                        <div class="acl-adding-panel">
-                            <div class="acl-adding-header"><h4>New ACL</h4></div>
-                            <a class="pointer pull-right" style="margin-right: 4px" onclick="closeACL()">
-                                <i class="fa fa-times"></i>
-                            </a>
-                              <select name="user-group" class="user-group">
-                                </select>
-                                <br/>
-                            <a class="pointer pull-right" style="margin-right: 4px" onclick="saveACL()">
-                                <i class="fa fa-check"></i>
-                            </a>
-                                <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: read" value="read">
-                                    Read <span class="muted">(r)</span>
-                                </label>
-                                <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: write" value="write">
-                                    Write <span class="muted">(w)</span>
-                                </label>
-                                                                <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: execute" value="execute">
-                                    Execute <span class="muted">(x)</span>
-                                </label>
-                                            <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: admin" value="admin">
-                                    ADMIN <span class="muted">(admin)</span>
-                                </label>
-                                            <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: all" value="all">
-                                    All <span class="muted">(all)</span>
-                                </label>
-
-                        </div>
-                    </p>
-
-                </div>
             </div>
 
             <div class="list-by-group">
@@ -253,13 +215,13 @@ ${shared.menubar(section='mytab')}
 });
 
   function newACL() {
-      $('.acl-adding-panel').show();
+      //$('.acl-adding-panel').show();
       $('.acl-add-button').hide();
       $("#new-acl-popup").modal();
   };
 
   function closeACL() {
-      $('.acl-adding-panel').hide();
+      //$('.acl-adding-panel').hide();
       $('.acl-add-button').show();
   };
 
