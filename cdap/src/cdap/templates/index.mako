@@ -29,9 +29,41 @@ ${shared.menubar(section='mytab')}
     <div class="modal-footer">
       <button onclick="cdap_submit()" type="button" class="btn btn-default" data-dismiss="modal">Login</button>
     </div>
+</div>
 
-
-
+<div class="modal fade" id="new-acl-popup" role="dialog">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+      <h4 class="modal-title">Configure the ACL</h4>
+    </div>
+    <div class="modal-body">
+        <label for="role">Select a role:</label>
+        <select name="user-group" id="role" class="user-group">
+            </select><br/>
+        <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: read" value="READ">
+            Read <span class="muted">(r)</span>
+        </label>
+        <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: write" value="WRITE">
+            Write <span class="muted">(w)</span>
+        </label>
+                                        <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: execute" value="EXECUTE">
+            Execute <span class="muted">(x)</span>
+        </label>
+                    <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: admin" value="ADMIN">
+            ADMIN <span class="muted">(admin)</span>
+        </label>
+                    <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: all" value="ALL">
+            All <span class="muted">(all)</span>
+        </label>
+    </div>
+    <div class="modal-footer">
+      <button onclick="saveACL()" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
+    </div>
 </div>
 
 <div class="container-fluid">
@@ -105,54 +137,8 @@ ${shared.menubar(section='mytab')}
                           </tr>
                         </thead>
                         <tbody id="acl-table-body">
-                          <tr>
-                            <td>role</td>
-                            <td><span class="read">read</span></td>
-                            <td>
-                                <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true"></i></a>
-                                <a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a>
-                            </td>
-                          </tr>
                         </tbody>
                       </table>
-                </div>
-                <div class="acl-new">
-                    <p class="acl-adding">
-                        <div class="acl-adding-panel">
-                            <div class="acl-adding-header"><h4>New ACL</h4></div>
-                            <a class="pointer pull-right" style="margin-right: 4px" onclick="closeACL()">
-                                <i class="fa fa-times"></i>
-                            </a>
-                              <select name="user-group" class="user-group">
-                                </select>
-                                <br/>
-                            <a class="pointer pull-right" style="margin-right: 4px" onclick="saveACL()">
-                                <i class="fa fa-check"></i>
-                            </a>
-                                <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: read" value="read">
-                                    Read <span class="muted">(r)</span>
-                                </label>
-                                <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: write" value="write">
-                                    Write <span class="muted">(w)</span>
-                                </label>
-                                                                <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: execute" value="execute">
-                                    Execute <span class="muted">(x)</span>
-                                </label>
-                                            <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: admin" value="admin">
-                                    ADMIN <span class="muted">(admin)</span>
-                                </label>
-                                            <label class="checkbox inline-block">
-                                    <input type="checkbox" data-bind="checked: all" value="all">
-                                    All <span class="muted">(all)</span>
-                                </label>
-
-                        </div>
-                    </p>
-
                 </div>
             </div>
 
@@ -194,7 +180,8 @@ ${shared.menubar(section='mytab')}
 
   function refresfDetail(treeStructString){
 
-      var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true"></i></a> <a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a> </td>';
+      var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true" onclick="editACL(this)"></i></a> ' +
+
       $.get("/cdap/details" + treeStructString, function(data){
           $("#acl-table-body").empty();
           $(".acl-description").JSONView(data,{ collapsed: true });
@@ -221,14 +208,45 @@ ${shared.menubar(section='mytab')}
 });
 
   function newACL() {
-      $('.acl-adding-panel').show();
-      $('.acl-add-button').hide();
+      $("#new-acl-popup").modal();
   };
 
-  function closeACL() {
-      $('.acl-adding-panel').hide();
-      $('.acl-add-button').show();
-  };
+  function delACL(element) {
+      var tds = element.parentElement.parentElement.parentElement.children;
+      var role = tds[0].textContent;
+      var actions = tds[1].textContent.split(",");
+      var path = $(".acl-heading").text();
+      console.log(role);
+      console.log(actions);
+
+      // get data from backend
+      $("body").css("cursor", "progress");
+      $.ajax({
+      type: "POST",
+      url: "/cdap/revoke",
+      data: {"role":role, "actions":actions, "path":path},
+      success: function(){
+            refresfDetail("/" + path);
+            $("body").css("cursor", "default");
+            },
+        });
+  }
+
+  function editACL(element){
+      newACL();
+      var tds = element.parentElement.parentElement.parentElement.children;
+      var role = tds[0].textContent;
+      var actions = tds[1].textContent.split(",");
+      // Set checkbox
+      var checkboxes = $( "input:CHECKBOX" );
+      for (var i = 0; i < checkboxes.length; i++){
+          if (actions.indexOf(checkboxes[i].value) != -1){
+              checkboxes[i].checked = true;
+          }
+      }
+      // Set select pannel
+      $(".user-group").val(role)
+  }
 
   function delACL(element) {
       var tds = element.parentElement.parentElement.parentElement.children;
@@ -248,23 +266,33 @@ ${shared.menubar(section='mytab')}
   }
 
   function saveACL() {
+      var allActions = ["READ","WRITE","EXECUTE","ADMIN","ALL"];
       var role = $(".user-group").find(":selected").text();
       var path = $(".acl-heading").text();
       var actions = [];
       var checked = $( "input:checked" )
       for(var i = 0; i < checked.length; i++ ){
           console.log(checked[i].value);
+          checked[i].checked = false;
           actions.push(checked[i].value);
       }
+      $("body").css("cursor", "progress");
       $.ajax({
       type: "POST",
-      url: "/cdap/grant",
-      data: {"role":role, "actions":actions, "path":path},
+      url: "/cdap/revoke",
+      data: {"role":role, "actions":allActions, "path":path},
       success: function(){
-            refresfDetail("/" + path);
+              $.ajax({
+              type: "POST",
+              url: "/cdap/grant",
+              data: {"role":role, "actions":actions, "path":path},
+              success: function(){
+                    refresfDetail("/" + path);
+                    $("body").css("cursor", "default");
+                    },
+                });
             },
         });
-      closeACL();
   }
 
   function cdap_submit(){
