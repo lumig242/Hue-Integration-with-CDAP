@@ -193,12 +193,14 @@ ${shared.menubar(section='mytab')}
   }
 
   function refresfDetail(treeStructString){
+
+      var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true"></i></a> <a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a> </td>';
       $.get("/cdap/details" + treeStructString, function(data){
           $("#acl-table-body").empty();
           $(".acl-description").JSONView(data,{ collapsed: true });
           privileges = data["privileges"];
           for(var role in privileges){
-            $("#acl-table-body").append("<tr><td>"+ role + "</td><td>" + privileges[role]["actions"].join(",") + "</td><td></td></tr>");
+            $("#acl-table-body").append("<tr><td>"+ role + "</td><td>" + privileges[role]["actions"].join(",") + "</td>" + template + "<td></td></tr>");
           }
       })
 
