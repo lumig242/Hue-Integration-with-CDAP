@@ -181,7 +181,7 @@ ${shared.menubar(section='mytab')}
   function refresfDetail(treeStructString){
 
       var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true" onclick="editACL(this)"></i></a> ' +
-
+            '<a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a> </td>';
       $.get("/cdap/details" + treeStructString, function(data){
           $("#acl-table-body").empty();
           $(".acl-description").JSONView(data,{ collapsed: true });
