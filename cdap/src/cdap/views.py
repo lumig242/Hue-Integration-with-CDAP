@@ -17,7 +17,7 @@
 
 
 from desktop.lib.django_util import render
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponse, HttpResponseServerError
 from cdap.client import auth_client
 from cdap.conf import CDAP_API_HOST, CDAP_API_PORT, CDAP_API_VERSION
 from libsentry.api2 import get_api
@@ -25,7 +25,6 @@ from libsentry.api2 import get_api
 import urllib2
 import json
 import logging
-
 from collections import defaultdict
 
 LOG = logging.getLogger(__name__)
@@ -35,14 +34,50 @@ CDAP_CLIENT = auth_client(BASE_URL)
 ENTITIES_ALL = dict()
 
 
+##############################################################
+# Localized helper functions defined here
+##############################################################
+
 def _call_cdap_api(url):
   return CDAP_CLIENT.get(url)
+
+
+def _match_authorizables(authorizables, path):
+  return True if path[:len(authorizables)] == authorizables else False
+
+
+def _to_sentry_privilege(action, authorizables):
+  return {
+    "component": "cdap",
+    "serviceName": "cdap",
+    "authorizables": authorizables,
+    "action": action,
+  }
+
+
+def _path_to_sentry_authorizables(path):
+  path = path.strip("/").split("/")
+  path = ["instance", "cdap", "namespace"] + path
+  authorizables = list()
+  for i in xrange(0, len(path), 2):
+    authorizables.append({"type": path[i].upper(), "name": path[i + 1].lower()})
+  return authorizables
+
+
+##############################################################
+# Router functions goes here
+##############################################################
 
 def cdap_authenticate(request):
   print request.POST["username"]
   print request.POST["password"]
-  CDAP_CLIENT.set_credentials(request.POST["username"], request.POST["password"])
-  return HttpResponse()
+  try:
+    CDAP_CLIENT.set_credentials(request.POST["username"], request.POST["password"])
+    return HttpResponse()
+  except Exception as e:
+    print e
+    return HttpResponseServerError(e, content_type="application/text")
+
 
 def index(request):
   global ENTITIES_ALL
@@ -78,7 +113,7 @@ def index(request):
               program_dict[program["type"].lower()] = list()
             program_dict[program["type"].lower()].append(program)
           entities[ns][entity_type][item["name"]] = program_dict
-          ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, {p["name"]:p})
+          ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, {p["name"]: p})
                                                              for p_type, programs in program_dict.iteritems()
                                                              for p in programs)
           ENTITIES_ALL[ns][entity_type][item["name"]].update(item)
@@ -88,9 +123,6 @@ def index(request):
 
   return render('index.mako', request, dict(date2="testjson", entities=entities))
 
-
-def _match_authorizables(authorizables, path):
-  return True if path[:len(authorizables)] == authorizables else False
 
 def details(request, path):
   item = ENTITIES_ALL
@@ -116,23 +148,6 @@ def details(request, path):
   return HttpResponse(json.dumps(item), content_type="application/json")
 
 
-def _to_sentry_privilege(action, authorizables):
-  return {
-    "component": "cdap",
-    "serviceName": "cdap",
-    "authorizables": authorizables,
-    "action": action,
-  }
-
-
-def _path_to_sentry_authorizables(path):
-  path = path.strip("/").split("/")
-  path = ["instance", "cdap", "namespace"] + path
-  authorizables = list()
-  for i in xrange(0, len(path), 2):
-    authorizables.append({"type":path[i].upper(), "name":path[i+1].lower()})
-  return authorizables
-
 def grant_privileges(request):
   role = request.POST["role"]
   actions = request.POST.getlist("actions[]")
@@ -155,7 +170,7 @@ def revoke_privileges(request):
 
 def list_roles_by_group(request):
   sentry_privileges = get_api(request.user, "cdap").list_sentry_roles_by_group()
-  #sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
+  # sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
   print sentry_privileges
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 
@@ -170,7 +185,7 @@ def list_privileges_by_group(request, group):
   api = get_api(request.user, "cdap")
   # Fetch all the privileges from sentry first
   sentry_privileges = api.list_sentry_roles_by_group()
-  #sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
+  # sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
   print sentry_privileges
 
   # Construct a dcitionary like {groupname:[role1,role2,role3]}
@@ -191,6 +206,6 @@ def list_privileges_by_group(request, group):
 
 def list_privileges_by_authorizable(request):
   # This is a test
-  authorizableSet = [{"authorizables":[{"type":"NAMESPACE", "name":"rohit"}]}]
+  authorizableSet = [{"authorizables": [{"type": "NAMESPACE", "name": "rohit"}]}]
   sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_authorizable("cdap", authorizableSet)
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
