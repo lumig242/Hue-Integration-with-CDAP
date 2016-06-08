@@ -41,23 +41,23 @@ ${shared.menubar(section='mytab')}
         <select name="user-group" id="role" class="user-group">
             </select><br/>
         <label class="checkbox inline-block">
-            <input type="checkbox" data-bind="checked: read" value="read">
+            <input type="checkbox" data-bind="checked: read" value="READ">
             Read <span class="muted">(r)</span>
         </label>
         <label class="checkbox inline-block">
-            <input type="checkbox" data-bind="checked: write" value="write">
+            <input type="checkbox" data-bind="checked: write" value="WRITE">
             Write <span class="muted">(w)</span>
         </label>
                                         <label class="checkbox inline-block">
-            <input type="checkbox" data-bind="checked: execute" value="execute">
+            <input type="checkbox" data-bind="checked: execute" value="EXECUTE">
             Execute <span class="muted">(x)</span>
         </label>
                     <label class="checkbox inline-block">
-            <input type="checkbox" data-bind="checked: admin" value="admin">
+            <input type="checkbox" data-bind="checked: admin" value="ADMIN">
             ADMIN <span class="muted">(admin)</span>
         </label>
                     <label class="checkbox inline-block">
-            <input type="checkbox" data-bind="checked: all" value="all">
+            <input type="checkbox" data-bind="checked: all" value="ALL">
             All <span class="muted">(all)</span>
         </label>
     </div>
@@ -141,7 +141,7 @@ ${shared.menubar(section='mytab')}
                             <td>role</td>
                             <td><span class="read">read</span></td>
                             <td>
-                                <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true"></i></a>
+                                <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true" onclick="delACL(this)"></i></a>
                                 <a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a>
                             </td>
                           </tr>
@@ -188,7 +188,8 @@ ${shared.menubar(section='mytab')}
 
   function refresfDetail(treeStructString){
 
-      var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true"></i></a> <a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a> </td>';
+      var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true" onclick="editACL(this)"></i></a> ' +
+              '<a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a> </td>';
       $.get("/cdap/details" + treeStructString, function(data){
           $("#acl-table-body").empty();
           $(".acl-description").JSONView(data,{ collapsed: true });
@@ -215,14 +216,7 @@ ${shared.menubar(section='mytab')}
 });
 
   function newACL() {
-      //$('.acl-adding-panel').show();
-      $('.acl-add-button').hide();
       $("#new-acl-popup").modal();
-  };
-
-  function closeACL() {
-      //$('.acl-adding-panel').hide();
-      $('.acl-add-button').show();
   };
 
   function delACL(element) {
@@ -242,6 +236,20 @@ ${shared.menubar(section='mytab')}
         });
   }
 
+  function editACL(element){
+      newACL();
+      var tds = element.parentElement.parentElement.parentElement.children;
+      var role = tds[0].textContent;
+      var actions = tds[1].textContent.split(",");
+      // Set checkbox
+      var checkboxes = $( "input:CHECKBOX" );
+      for (var i = 0; i < checkboxes.length; i++){
+          if (actions.indexOf(checkboxes[i].value) != -1){
+              checkboxes[i].checked = true;
+          }
+      }
+  }
+
   function saveACL() {
       var role = $(".user-group").find(":selected").text();
       var path = $(".acl-heading").text();
@@ -252,15 +260,22 @@ ${shared.menubar(section='mytab')}
           checked[i].checked = false;
           actions.push(checked[i].value);
       }
+
       $.ajax({
       type: "POST",
-      url: "/cdap/grant",
+      url: "/cdap/revoke",
       data: {"role":role, "actions":actions, "path":path},
       success: function(){
-            refresfDetail("/" + path);
+              $.ajax({
+              type: "POST",
+              url: "/cdap/grant",
+              data: {"role":role, "actions":actions, "path":path},
+              success: function(){
+                    refresfDetail("/" + path);
+                    },
+                });
             },
         });
-      closeACL();
   }
 
   function cdap_submit(){
