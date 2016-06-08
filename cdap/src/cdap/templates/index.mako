@@ -29,9 +29,41 @@ ${shared.menubar(section='mytab')}
     <div class="modal-footer">
       <button onclick="cdap_submit()" type="button" class="btn btn-default" data-dismiss="modal">Login</button>
     </div>
+</div>
 
-
-
+<div class="modal fade" id="new-acl-popup" role="dialog">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+      <h4 class="modal-title">Configure the ACL</h4>
+    </div>
+    <div class="modal-body">
+        <label for="role">Select a role:</label>
+        <select name="user-group" id="role" class="user-group">
+            </select><br/>
+        <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: read" value="read">
+            Read <span class="muted">(r)</span>
+        </label>
+        <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: write" value="write">
+            Write <span class="muted">(w)</span>
+        </label>
+                                        <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: execute" value="execute">
+            Execute <span class="muted">(x)</span>
+        </label>
+                    <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: admin" value="admin">
+            ADMIN <span class="muted">(admin)</span>
+        </label>
+                    <label class="checkbox inline-block">
+            <input type="checkbox" data-bind="checked: all" value="all">
+            All <span class="muted">(all)</span>
+        </label>
+    </div>
+    <div class="modal-footer">
+      <button onclick="saveACL()" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
+    </div>
 </div>
 
 <div class="container-fluid">
@@ -223,6 +255,7 @@ ${shared.menubar(section='mytab')}
   function newACL() {
       $('.acl-adding-panel').show();
       $('.acl-add-button').hide();
+      $("#new-acl-popup").modal();
   };
 
   function closeACL() {
@@ -254,6 +287,7 @@ ${shared.menubar(section='mytab')}
       var checked = $( "input:checked" )
       for(var i = 0; i < checked.length; i++ ){
           console.log(checked[i].value);
+          checked[i].checked = false;
           actions.push(checked[i].value);
       }
       $.ajax({
