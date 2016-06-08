@@ -248,6 +248,8 @@ ${shared.menubar(section='mytab')}
               checkboxes[i].checked = true;
           }
       }
+      // Set select pannel
+      $(".user-group").val(role)
   }
 
   function saveACL() {
