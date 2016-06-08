@@ -226,12 +226,16 @@ ${shared.menubar(section='mytab')}
       var path = $(".acl-heading").text();
       console.log(role);
       console.log(actions);
+
+      // get data from backend
+      $("body").css("cursor", "progress");
       $.ajax({
       type: "POST",
       url: "/cdap/revoke",
       data: {"role":role, "actions":actions, "path":path},
       success: function(){
             refresfDetail("/" + path);
+            $("body").css("cursor", "default");
             },
         });
   }
@@ -253,6 +257,7 @@ ${shared.menubar(section='mytab')}
   }
 
   function saveACL() {
+      var allActions = ["READ","WRITE","EXECUTE","ADMIN","ALL"];
       var role = $(".user-group").find(":selected").text();
       var path = $(".acl-heading").text();
       var actions = [];
@@ -262,11 +267,11 @@ ${shared.menubar(section='mytab')}
           checked[i].checked = false;
           actions.push(checked[i].value);
       }
-
+      $("body").css("cursor", "progress");
       $.ajax({
       type: "POST",
       url: "/cdap/revoke",
-      data: {"role":role, "actions":actions, "path":path},
+      data: {"role":role, "actions":allActions, "path":path},
       success: function(){
               $.ajax({
               type: "POST",
@@ -274,6 +279,7 @@ ${shared.menubar(section='mytab')}
               data: {"role":role, "actions":actions, "path":path},
               success: function(){
                     refresfDetail("/" + path);
+                    $("body").css("cursor", "default");
                     },
                 });
             },
