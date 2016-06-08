@@ -137,14 +137,6 @@ ${shared.menubar(section='mytab')}
                           </tr>
                         </thead>
                         <tbody id="acl-table-body">
-                          <tr>
-                            <td>role</td>
-                            <td><span class="read">read</span></td>
-                            <td>
-                                <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true" onclick="delACL(this)"></i></a>
-                                <a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a>
-                            </td>
-                          </tr>
                         </tbody>
                       </table>
                 </div>
@@ -189,7 +181,7 @@ ${shared.menubar(section='mytab')}
   function refresfDetail(treeStructString){
 
       var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true" onclick="editACL(this)"></i></a> ' +
-              '<a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a> </td>';
+
       $.get("/cdap/details" + treeStructString, function(data){
           $("#acl-table-body").empty();
           $(".acl-description").JSONView(data,{ collapsed: true });
@@ -254,6 +246,23 @@ ${shared.menubar(section='mytab')}
       }
       // Set select pannel
       $(".user-group").val(role)
+  }
+
+  function delACL(element) {
+      var tds = element.parentElement.parentElement.parentElement.children;
+      var role = tds[0].textContent;
+      var actions = tds[1].textContent.split(",");
+      var path = $(".acl-heading").text();
+      console.log(role);
+      console.log(actions);
+      $.ajax({
+      type: "POST",
+      url: "/cdap/revoke",
+      data: {"role":role, "actions":actions, "path":path},
+      success: function(){
+            refresfDetail("/" + path);
+            },
+        });
   }
 
   function saveACL() {
