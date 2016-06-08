@@ -24,7 +24,7 @@ class auth_client:
     except requests.exceptions.ConnectionError:
       raise Exception("Cannot decode the reponse from host. Please check your cdap host settings.")
 
-  def get_token(self, auth_uri):
+  def _get_token(self, auth_uri):
     try:
       response = requests.get(auth_uri, auth=(self._cdap_username, self._cdap_password)).content
       return json.loads(response)
@@ -42,7 +42,7 @@ class auth_client:
     if "auth_uri" in res:
       # Not authorized/ Expired
       # Update the token
-      token = self.get_token(res["auth_uri"][0])
+      token = self._get_token(res["auth_uri"][0])
       self.auth_header = {'Authorization': token["token_type"] + ' ' + token["access_token"]}
       res = json.loads(requests.get(self.host_url + url, headers=self.auth_header).text)
     return res
