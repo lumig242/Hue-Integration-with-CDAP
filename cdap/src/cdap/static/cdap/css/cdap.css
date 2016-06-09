@@ -56,8 +56,11 @@ Customized CSS style
 }
 
 .row-fluid .span4 {
-    width: 48%;
-    height: 100%;
+    border-left: 1px solid #e5e5e5;
+    padding-top: 6px;
+    padding-left: 18px;
+    width: 39%;
+    height: 1000px;
 }
 
 #json-view{
@@ -70,9 +73,6 @@ Customized CSS style
 }
 
 .acl-panel{
-    border-left: 1px solid #e5e5e5;
-    padding-top: 6px;
-    padding-left: 18px;
     height: 1000px;
 }
 
@@ -82,7 +82,7 @@ Customized CSS style
 }
 
 .acl-add-button {
-    padding-right: 88%;
+    padding-right: 78%;
 }
 
 .acl-new {
@@ -91,4 +91,8 @@ Customized CSS style
 
 .acl-management {
     margin-top: 5px;
+}
+
+.role-management {
+    display: None;
 }

@@ -16,8 +16,8 @@ class auth_client:
     self.is_set_credentials = False
 
   def set_credentials(self, username, password):
-    self._cdap_username = username
-    self._cdap_password = password
+    self._cdap_username = "shenggu"
+    self._cdap_password = "udxc2knu"
     try:
       self.get("/namespaces")
       self.is_set_credentials = True
