@@ -169,7 +169,7 @@ def revoke_privileges(request):
     api.alter_sentry_role_revoke_privilege(role, tSentryPrivilege)
   # Check if all the privileges are revoked successfully
   response_msgs = [_sengty_authorizables_to_path(priv["authorizables"])
-                   for priv in api.list_sentry_privileges_by_role(role)
+                   for priv in api.list_sentry_privileges_by_role("cdap", role)
                    if _match_authorizables(priv["authorizables"], authorizables)]
   return HttpResponse(json.dumps(response_msgs), content_type="application/json")
 
