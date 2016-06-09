@@ -61,17 +61,21 @@ def _path_to_sentry_authorizables(path):
   return [{"type": path[i].upper(), "name": path[i + 1].lower()} for i in xrange(0, len(path), 2)]
 
 
-def _sengty_authorizables_to_path(authorizables):
+def _sentry_authorizables_to_path(authorizables):
   path = [auth[key] for auth in authorizables for key in ("type", "name")]
   return "/".join(path)
+
 
 ##############################################################
 # Router functions goes here
 ##############################################################
 
 def cdap_authenticate(request):
-  print request.POST["username"]
-  print request.POST["password"]
+  """
+  API for authentication of CDAP secure clusters
+  :param request: POST DATA: {"username":username, "password":password}
+  :return:
+  """
   try:
     CDAP_CLIENT.set_credentials(request.POST["username"], request.POST["password"])
     return HttpResponse()
@@ -85,11 +89,10 @@ def index(request):
     return render('index.mako', request, dict(date2="testjson", unauthenticated=True))
   namespace_url = "/namespaces"
   namespaces = _call_cdap_api(namespace_url)
-  # entities = {ns.get("name"): dict() for ns in namespaces}
   entities = dict((ns.get("name"), dict()) for ns in namespaces)
   ENTITIES_ALL = dict((ns.get("name"), ns) for ns in namespaces)
 
-  apis = {
+  cdap_rest_apis = {
     "stream": "/streams",
     "dataset": "/data/datasets",
     "artifact": "/artifacts",
@@ -97,7 +100,7 @@ def index(request):
   }
 
   for ns in entities:
-    for entity_type, entity_url in apis.iteritems():
+    for entity_type, entity_url in cdap_rest_apis.iteritems():
       full_url = namespace_url + "/" + ns + entity_url
       items = _call_cdap_api(full_url)
 
@@ -125,17 +128,24 @@ def index(request):
 
 
 def details(request, path):
-  item = ENTITIES_ALL
-  for k in path.strip("/").split("/"):
-    item = item[k]
-
+  """
+  Return detailed information of the entity with path
+  :param request:
+  :param path: Path to the entity
+  :return: Json Struct. Specifically, sentry privileges are constructed as:
+  {
+    "privileges": {
+      "role": {
+        "actions": [action1, action2, action3...],
+      }
+    }
+  }
+  """
   api = get_api(request.user, "cdap")
   # Fetch all the privileges from sentry first
   roles = [result["name"] for result in api.list_sentry_roles_by_group()]
   privileges = {}
-
   path = _path_to_sentry_authorizables(path)
-
   for role in roles:
     sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
     for privilege in sentry_privilege:
@@ -144,11 +154,22 @@ def details(request, path):
           privileges[role] = defaultdict(list)
         privileges[role]["actions"].append(privilege["action"])
 
+  item = ENTITIES_ALL
+  for k in path.strip("/").split("/"):
+    item = item[k]
   item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
 
 
 def grant_privileges(request):
+  """
+  Grant a list of actions to an entity. Should be a Post Method.
+  :param request: POST DATA{
+    "role":role name of,
+    "actions": a list/array of actions,
+    "path": the path to entity,
+  }
+  """
   api = get_api(request.user, "cdap")
   role = request.POST["role"]
   actions = request.POST.getlist("actions[]")
@@ -160,6 +181,15 @@ def grant_privileges(request):
 
 
 def revoke_privileges(request):
+  """
+  Revoke a list of actions to an entity. Should be a Post Method.
+  :param request: POST DATA{
+    "role":role name of,
+    "actions": a list/array of actions,
+    "path": the path to entity,
+  }
+  :return: If entity privileges cannot be revoked, return a Json array of where these privileges are defined.
+  """
   api = get_api(request.user, "cdap")
   role = request.POST["role"]
   actions = request.POST.getlist("actions[]")
@@ -168,27 +198,46 @@ def revoke_privileges(request):
     tSentryPrivilege = _to_sentry_privilege(action, authorizables)
     api.alter_sentry_role_revoke_privilege(role, tSentryPrivilege)
   # Check if all the privileges are revoked successfully
-  response_msgs = [_sengty_authorizables_to_path(priv["authorizables"])
+  response_msgs = [_sentry_authorizables_to_path(priv["authorizables"])
                    for priv in api.list_sentry_privileges_by_role("cdap", role)
                    if _match_authorizables(priv["authorizables"], authorizables)]
   return HttpResponse(json.dumps(response_msgs), content_type="application/json")
 
 
 def list_roles_by_group(request):
+  """
+  List sentry roles along with group
+  :param request:
+  :return: A Json struct
+    {
+      "name": role name,
+      "groups": [group1, group2, group3...]
+    }
+  """
   sentry_privileges = get_api(request.user, "cdap").list_sentry_roles_by_group()
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 
 
 def list_privileges_by_role(request, role):
+  """
+  List sentry privilegs by role
+  :param request:
+  :param role: role name
+  :return: A Json array of SentryPrivileges: [p1, p2, p3...]
+  """
   sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_role("cdap", role)
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 
 
 def list_privileges_by_group(request, group):
+  """
+  List sentry privileges by group
+  :param request:
+  :param group: group name
+  :return: A Json array of SentryPrivileges: [p1, p2, p3...]
+  """
   api = get_api(request.user, "cdap")
   sentry_privileges = api.list_sentry_roles_by_group()
-  print sentry_privileges
-
   # Construct a dcitionary like {groupname:[role1,role2,role3]}
   reverse_group_role_dict = dict()
   for item in sentry_privileges:
@@ -206,7 +255,11 @@ def list_privileges_by_group(request, group):
 
 
 def list_privileges_by_authorizable(request):
-  # This is a test
+  """
+  A test function
+  :param request:
+  :return:
+  """
   authorizableSet = [{"authorizables": [{"type": "NAMESPACE", "name": "rohit"}]}]
   sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_authorizable("cdap", authorizableSet)
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
