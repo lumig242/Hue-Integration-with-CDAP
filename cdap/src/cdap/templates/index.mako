@@ -12,7 +12,6 @@ ${shared.menubar(section='mytab')}
 <link rel="stylesheet" href="/static/cdap/css/cdap.css">
 
 <style>
-
 </style>
 
 ## Use double hashes for a mako template comment
@@ -255,12 +254,10 @@ ${shared.menubar(section='mytab')}
 
 <script>
   $(document).ready(function () {
-
     $('.list-role-table').on('click-row.bs.table', function (event, row, element) {
       console.log(row.role);
       updateRoleACL(row.role);
     });
-
     $('.myModal').on('show.bs.modal', function (e) {
       $('.myModal').css("width", "700px");
       $('.myModal').css("z-index", "100000");
@@ -269,20 +266,16 @@ ${shared.menubar(section='mytab')}
       $('.myModal').css("width", "0px");
       $('.myModal').css("z-index", "-10");
     })
-
     $(".user-group").on("change", function () {
       setPrivCheckbox();
     });
-
     if ($(".is_authenticated").text() == "False") {
       $("#popup").modal();
     }
-
     $('#jstree').on('changed.jstree', function (e, data) {
       var r = data.instance.get_node(data.selected[data.selected.length - 1])
       entityClicked(r, data);
     })
-
     $('#jstree').jstree(
         {
           "core": {
@@ -293,7 +286,6 @@ ${shared.menubar(section='mytab')}
               "dots": true,
               "icons": true
             },
-
           },
           "types": {
             "#": {
@@ -318,7 +310,6 @@ ${shared.menubar(section='mytab')}
           ]
         });
     $('#jstree').jstree("open_node", $(".jstree-anchor"));
-
   });
 </script>
 

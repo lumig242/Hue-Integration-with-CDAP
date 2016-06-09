@@ -62,6 +62,7 @@ def _path_to_sentry_authorizables(path):
   return [{"type": path[i].upper(), "name": path[i + 1].lower()} for i in xrange(0, len(path), 2)]
 
 
+
 def _sentry_authorizables_to_path(authorizables):
   path = [auth[key] for auth in authorizables for key in ("type", "name")]
   return "/".join(path)
@@ -76,6 +77,7 @@ def _filter_list_roles_by_group(api):
   """
   roles = api.list_sentry_roles_by_group()
   return filter(lambda item: not item["name"].startswith("."), roles)
+
 
 ##############################################################
 # Router functions goes here
@@ -183,6 +185,7 @@ def grant_privileges(request):
     "path": the path to entity,
   }
   """
+
   api = get_api(request.user, "cdap")
   role = request.POST["role"]
   actions = request.POST.getlist("actions[]")
@@ -253,6 +256,8 @@ def list_privileges_by_group(request, group):
   """
   api = get_api(request.user, "cdap")
   sentry_privileges = _filter_list_roles_by_group(api)
+  print sentry_privileges
+
   # Construct a dcitionary like {groupname:[role1,role2,role3]}
   reverse_group_role_dict = dict()
   for item in sentry_privileges:
@@ -282,7 +287,6 @@ def list_privileges_by_authorizable(request):
 
 def create_role(request, role_name):
   """
-
   :param request:
   :param role_name:
   :return:
@@ -293,7 +297,6 @@ def create_role(request, role_name):
 
 def drop_role(request, role_name):
   """
-
   :param request:
   :param role_name:
   :return:
