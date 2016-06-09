@@ -168,6 +168,15 @@ ${shared.menubar(section='mytab')}
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
     <script>
+      Array.prototype.unique = function () {
+        return this.reduce(function (accum, current) {
+          if (accum.indexOf(current) < 0) {
+            accum.push(current);
+          }
+          return accum;
+        }, []);
+      }
+
       function entityClicked(entity, data) {
         var parents = entity.parents;
         if (parents.length % 2 == 1) {
@@ -194,7 +203,7 @@ ${shared.menubar(section='mytab')}
           $(".acl-description").JSONView(data, {collapsed: true});
           privileges = data["privileges"];
           for (var role in privileges) {
-            $("#acl-table-body").append("<tr><td>" + role + "</td><td>" + privileges[role]["actions"].join(",") + "</td>" + template + "<td></td></tr>");
+            $("#acl-table-body").append("<tr><td>" + role + "</td><td>" + privileges[role]["actions"].unique().join(",") + "</td>" + template + "<td></td></tr>");
           }
         })
 
@@ -216,8 +225,7 @@ ${shared.menubar(section='mytab')}
 
       function newACL() {
         $("#new-acl-popup").modal();
-      }
-      ;
+      };
 
       function delACL(element) {
         var tds = element.parentElement.parentElement.parentElement.children;
@@ -279,7 +287,7 @@ ${shared.menubar(section='mytab')}
         var role = $(".user-group").find(":selected").text();
         var path = $(".acl-heading").text();
         var actions = [];
-        var checked = $("input:checked")
+        var checked = $("input:checked");
         for (var i = 0; i < checked.length; i++) {
           console.log(checked[i].value);
           checked[i].checked = false;
@@ -328,6 +336,21 @@ ${shared.menubar(section='mytab')}
         $('.myModal').on('hidden.bs.modal', function (e) {
           $('.myModal').css("width", "0px");
         })
+
+        $(".user-group").on("change", function () {
+          var role = $(".user-group").find(":selected").text();
+          var tr = $("td").filter(function () {
+            return $(this).text() == role;
+          }).closest("tr");
+          var actions = tr.children()[1].textContent.split(",");
+          // Set checkbox
+          var checkboxes = $("input:CHECKBOX");
+          for (var i = 0; i < checkboxes.length; i++) {
+            if (actions.indexOf(checkboxes[i].value) != -1) {
+              checkboxes[i].checked = true;
+            }
+          }
+        });
 
         if ($(".is_authenticated").text() == "False") {
           $("#popup").modal();
