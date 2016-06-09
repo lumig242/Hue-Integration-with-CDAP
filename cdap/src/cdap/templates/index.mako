@@ -225,6 +225,7 @@ ${shared.menubar(section='mytab')}
 
       function newACL() {
         $("#new-acl-popup").modal();
+        setPrivCheckbox();
       };
 
       function delACL(element) {
@@ -244,7 +245,9 @@ ${shared.menubar(section='mytab')}
           success: function (data) {
             refresfDetail("/" + path);
             $("body").css("cursor", "default");
-            alert("Can not revoke some privileges as they are defined on upper layer entites at: " + data);
+            if (data.length > 0){
+              alert("Can not revoke some privileges as they are defined on upper layer entites at: " + data);
+            }
           },
         });
       }
@@ -254,15 +257,10 @@ ${shared.menubar(section='mytab')}
         var tds = element.parentElement.parentElement.parentElement.children;
         var role = tds[0].textContent;
         var actions = tds[1].textContent.split(",");
-        // Set checkbox
-        var checkboxes = $("input:CHECKBOX");
-        for (var i = 0; i < checkboxes.length; i++) {
-          if (actions.indexOf(checkboxes[i].value) != -1) {
-            checkboxes[i].checked = true;
-          }
-        }
         // Set select pannel
         $(".user-group").val(role)
+        // Set checkbox
+        setPrivCheckbox();
       }
 
       function saveACL() {
@@ -312,17 +310,9 @@ ${shared.menubar(section='mytab')}
         });
       }
 
-      $(document).ready(function () {
-        $('.myModal').on('show.bs.modal', function (e) {
-          $('.myModal').css("width", "700px");
-        })
-        $('.myModal').on('hidden.bs.modal', function (e) {
-          $('.myModal').css("width", "0px");
-        })
-
-        $(".user-group").on("change", function () {
-          var role = $(".user-group").find(":selected").text();
-          var tr = $("td").filter(function () {
+      function setPrivCheckbox(){
+        var role = $(".user-group").find(":selected").text();
+        var tr = $("td").filter(function () {
             return $(this).text() == role;
           }).closest("tr");
           var actions = tr.children()[1].textContent.split(",");
@@ -334,6 +324,19 @@ ${shared.menubar(section='mytab')}
               checkboxes[i].checked = true;
             }
           }
+      }
+
+
+      $(document).ready(function () {
+        $('.myModal').on('show.bs.modal', function (e) {
+          $('.myModal').css("width", "700px");
+        })
+        $('.myModal').on('hidden.bs.modal', function (e) {
+          $('.myModal').css("width", "0px");
+        })
+
+        $(".user-group").on("change", function () {
+          setPrivCheckbox();
         });
 
         if ($(".is_authenticated").text() == "False") {
