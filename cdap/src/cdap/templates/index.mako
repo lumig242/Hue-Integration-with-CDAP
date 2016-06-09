@@ -315,7 +315,11 @@ ${shared.menubar(section='mytab')}
         var tr = $("td").filter(function () {
             return $(this).text() == role;
           }).closest("tr");
-          var actions = tr.children()[1].textContent.split(",");
+          if (tr.length > 0){
+            var actions = tr.children()[1].textContent.split(",");
+          }else {
+            var actions = [];
+          }
           // Set checkbox
           var checkboxes = $("input:CHECKBOX");
           for (var i = 0; i < checkboxes.length; i++) {
