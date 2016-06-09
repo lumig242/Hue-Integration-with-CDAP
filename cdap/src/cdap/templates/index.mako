@@ -265,23 +265,6 @@ ${shared.menubar(section='mytab')}
         $(".user-group").val(role)
       }
 
-      function delACL(element) {
-        var tds = element.parentElement.parentElement.parentElement.children;
-        var role = tds[0].textContent;
-        var actions = tds[1].textContent.split(",");
-        var path = $(".acl-heading").text();
-        console.log(role);
-        console.log(actions);
-        $.ajax({
-          type: "POST",
-          url: "/cdap/revoke",
-          data: {"role": role, "actions": actions, "path": path},
-          success: function () {
-            refresfDetail("/" + path);
-          },
-        });
-      }
-
       function saveACL() {
         var allActions = ["READ", "WRITE", "EXECUTE", "ADMIN", "ALL"];
         var role = $(".user-group").find(":selected").text();
@@ -346,6 +329,7 @@ ${shared.menubar(section='mytab')}
           // Set checkbox
           var checkboxes = $("input:CHECKBOX");
           for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = false;
             if (actions.indexOf(checkboxes[i].value) != -1) {
               checkboxes[i].checked = true;
             }
