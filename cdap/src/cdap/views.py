@@ -141,6 +141,10 @@ def details(request, path):
     }
   }
   """
+  item = ENTITIES_ALL
+  for k in path.strip("/").split("/"):
+    item = item[k]
+
   api = get_api(request.user, "cdap")
   # Fetch all the privileges from sentry first
   roles = [result["name"] for result in api.list_sentry_roles_by_group()]
@@ -154,9 +158,7 @@ def details(request, path):
           privileges[role] = defaultdict(list)
         privileges[role]["actions"].append(privilege["action"])
 
-  item = ENTITIES_ALL
-  for k in path.strip("/").split("/"):
-    item = item[k]
+
   item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
 
