@@ -58,11 +58,12 @@ def _to_sentry_privilege(action, authorizables):
 def _path_to_sentry_authorizables(path):
   path = path.strip("/").split("/")
   path = ["instance", "cdap", "namespace"] + path
-  authorizables = list()
-  for i in xrange(0, len(path), 2):
-    authorizables.append({"type": path[i].upper(), "name": path[i + 1].lower()})
-  return authorizables
+  return [{"type": path[i].upper(), "name": path[i + 1].lower()} for i in xrange(0, len(path), 2)]
 
+
+def _sengty_authorizables_to_path(authorizables):
+  path = [auth[key] for auth in authorizables for key in ("type", "name")]
+  return "/".join(path)
 
 ##############################################################
 # Router functions goes here
@@ -75,7 +76,6 @@ def cdap_authenticate(request):
     CDAP_CLIENT.set_credentials(request.POST["username"], request.POST["password"])
     return HttpResponse()
   except Exception as e:
-    print e
     return HttpResponseServerError(e, content_type="application/text")
 
 
@@ -149,43 +149,44 @@ def details(request, path):
 
 
 def grant_privileges(request):
+  api = get_api(request.user, "cdap")
   role = request.POST["role"]
   actions = request.POST.getlist("actions[]")
   authorizables = _path_to_sentry_authorizables(request.POST["path"])
   for action in actions:
     tSentryPrivilege = _to_sentry_privilege(action, authorizables)
-    result = get_api(request.user, "cdap").alter_sentry_role_grant_privilege(role, tSentryPrivilege)
+    api.alter_sentry_role_grant_privilege(role, tSentryPrivilege)
   return HttpResponse()
 
 
 def revoke_privileges(request):
+  api = get_api(request.user, "cdap")
   role = request.POST["role"]
   actions = request.POST.getlist("actions[]")
   authorizables = _path_to_sentry_authorizables(request.POST["path"])
   for action in actions:
     tSentryPrivilege = _to_sentry_privilege(action, authorizables)
-    result = get_api(request.user, "cdap").alter_sentry_role_revoke_privilege(role, tSentryPrivilege)
-  return HttpResponse()
+    api.alter_sentry_role_revoke_privilege(role, tSentryPrivilege)
+  # Check if all the privileges are revoked successfully
+  response_msgs = [_sengty_authorizables_to_path(priv["authorizables"])
+                   for priv in api.list_sentry_privileges_by_role(role)
+                   if _match_authorizables(priv["authorizables"], authorizables)]
+  return HttpResponse(json.dumps(response_msgs), content_type="application/json")
 
 
 def list_roles_by_group(request):
   sentry_privileges = get_api(request.user, "cdap").list_sentry_roles_by_group()
-  # sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
-  print sentry_privileges
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 
 
 def list_privileges_by_role(request, role):
   sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_role("cdap", role)
-  print sentry_privileges
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 
 
 def list_privileges_by_group(request, group):
   api = get_api(request.user, "cdap")
-  # Fetch all the privileges from sentry first
   sentry_privileges = api.list_sentry_roles_by_group()
-  # sentry_privileges = [{"name": "testrole2", "groups": []}, {"name": "testrole1", "groups": []}]
   print sentry_privileges
 
   # Construct a dcitionary like {groupname:[role1,role2,role3]}

@@ -233,9 +233,10 @@ ${shared.menubar(section='mytab')}
           type: "POST",
           url: "/cdap/revoke",
           data: {"role": role, "actions": actions, "path": path},
-          success: function () {
+          success: function (data) {
             refresfDetail("/" + path);
             $("body").css("cursor", "default");
+            alert("Can not revoke some privileges as they are defined on upper layer entites at: " + data);
           },
         });
       }
