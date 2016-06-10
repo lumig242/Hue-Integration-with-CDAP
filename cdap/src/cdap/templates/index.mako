@@ -123,10 +123,10 @@ ${shared.menubar(section='mytab')}
 
         <div class="span4"><h3>Roles</h3>
           <div id="toolbar" class="btn-group">
-            <button type="button" class="btn btn-default">
+            <button type="button" class="btn btn-default" onclick="$('#new-role-popup').modal();">
               <i class="glyphicon glyphicon-plus"></i>
             </button>
-            <button type="button" class="btn btn-default">
+            <button type="button" class="btn btn-default" onclick="deleteRole()">
               <i class="glyphicon glyphicon-trash"></i>
             </button>
           </div>
@@ -192,6 +192,22 @@ ${shared.menubar(section='mytab')}
           <button onclick="saveACL()" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
         </div>
       </div>
+
+    <div class="modal fade myModal" id="new-role-popup" role="dialog">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Create a new role</h4>
+      </div>
+      <div class="modal-body">
+        <label for="new-rolename">Role Name:</label>
+        <input id="new-rolename" type="text"/>
+
+      </div>
+      <div class="modal-footer">
+        <button onclick="saveRole()" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
+      </div>
+    </div>
+
   </div>
 </div>
 

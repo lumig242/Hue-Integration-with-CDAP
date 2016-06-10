@@ -61,7 +61,21 @@ function refreshRoleTable() {
     data: dataField
     });
   });
+}
 
+function deleteRole() {
+  var selections = $(".list-role-table").bootstrapTable('getAllSelections');
+  selections.forEach(function(item){
+    $.get("/cdap/drop_role/" + item.role, function(){
+      $(".list-role-table").bootstrapTable('remove', {field:"role", values:[item.role]})
+    });
+  });
+}
+
+function saveRole() {
+  $.get("/cdap/create_role/" + $("#new-rolename").val(), function(){
+    refreshRoleTable();
+  });
 }
 
 $(".nav-privilege").on("click", function(){
@@ -118,6 +132,7 @@ $('.btn-list-by-group').bind('input', function () {
     $(".json-list-by-group").JSONView(data);
   })
 });
+
 
 function newACL() {
   $("#new-acl-popup").modal();
