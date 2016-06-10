@@ -27,4 +27,6 @@ urlpatterns = patterns('cdap',
   url(r'^list_privileges_by_authorizable', 'views.list_privileges_by_authorizable'),
   url(r'^grant', 'views.grant_privileges'),
   url(r'^revoke', 'views.revoke_privileges'),
+  url(r'^create_role/(?P<role_name>.+)/', 'views.create_role'),
+  url(r'^drop_role/(?P<role_name>.+)/', 'views.drop_role'),
 )

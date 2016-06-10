@@ -265,3 +265,25 @@ def list_privileges_by_authorizable(request):
   authorizableSet = [{"authorizables": [{"type": "NAMESPACE", "name": "rohit"}]}]
   sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_authorizable("cdap", authorizableSet)
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
+
+
+def create_role(request, role_name):
+  """
+
+  :param request:
+  :param role_name:
+  :return:
+  """
+  get_api(request.user, "cdap").create_sentry_role(role_name)
+  return HttpResponse()
+
+
+def drop_role(request, role_name):
+  """
+
+  :param request:
+  :param role_name:
+  :return:
+  """
+  get_api(request.user, "cdap").drop_sentry_role(role_name)
+  return HttpResponse()
