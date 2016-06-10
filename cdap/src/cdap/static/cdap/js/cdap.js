@@ -32,7 +32,37 @@ $(".nav-role").on("click", function(){
   $(".privilege-management").hide();
   $(".nav-privilege").removeClass('active');
   $(".nav-role").addClass('active');
+  refreshRoleTable();
 });
+
+function refreshRoleTable() {
+  $.get("/cdap/list_roles_by_group", function(data){
+    var dataField = [];
+    data.forEach(function(item){
+      dataField.push({
+        state : false,
+        role: item.name,
+        group: item.groups.join(","),
+      });
+    });
+    console.log(dataField);
+    $(".list-role-table").bootstrapTable({
+    columns: [{
+               field: 'state',
+                checkbox: true,
+                align: 'center',
+    }, {
+        field: 'role',
+        title: 'Name'
+    }, {
+        field: 'group',
+        title: 'Group'
+    }],
+    data: dataField
+    });
+  });
+
+}
 
 $(".nav-privilege").on("click", function(){
   $(".privilege-management").show();

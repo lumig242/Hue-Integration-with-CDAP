@@ -6,6 +6,8 @@ ${shared.menubar(section='mytab')}
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 <link rel="stylesheet" href="/static/cdap/css/cdap.css">
 
 <style>
@@ -17,14 +19,11 @@ ${shared.menubar(section='mytab')}
 
 <div class="container-fluid">
   <div class="card">
-    <h2 class="card-heading simple">Entities</h2>
     <div class="card-body">
       % if unauthenticated:
         <h1>You are not authorized!</h1>
         <p hidden class="is_authenticated">False<p>
       % else:
-
-      <div class="row-fluid">
 
       <div class="row-fluid">
         <div class="span2">
@@ -120,15 +119,28 @@ ${shared.menubar(section='mytab')}
       % endif
     </div>
     </div>
-
       <div class="role-management">
-        <div class="span4"><h3>Hehe</h3></div>
+
+        <div class="span4"><h3>Roles</h3>
+          <div id="toolbar" class="btn-group">
+            <button type="button" class="btn btn-default">
+              <i class="glyphicon glyphicon-plus"></i>
+            </button>
+            <button type="button" class="btn btn-default">
+              <i class="glyphicon glyphicon-trash"></i>
+            </button>
+          </div>
+          <table class="table table-condensed list-role-table " data-toolbar="#toolbar"
+                 data-search="true" data-show-refresh="true" data-show-toggle="true"
+                 data-minimum-count-columns="2">
+          </table>
+        </div>
+
+
         <div class="span4"><h3>Hehe</h3></div>
       </div>
-
+      </div>
     </div>
-    </div>
-
 
       <div class="modal fade myModal" id="popup" role="dialog">
         <div class="modal-header">
@@ -180,12 +192,15 @@ ${shared.menubar(section='mytab')}
           <button onclick="saveACL()" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
         </div>
       </div>
-
+  </div>
+</div>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
       <script type="text/javascript"
               src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
       <script type="text/javascript" src="/static/cdap/js/cdap.js"></script>
+
 
       <script>
         $(document).ready(function () {

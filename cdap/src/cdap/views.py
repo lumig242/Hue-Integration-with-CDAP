@@ -92,37 +92,37 @@ def index(request):
   entities = dict((ns.get("name"), dict()) for ns in namespaces)
   ENTITIES_ALL = dict((ns.get("name"), ns) for ns in namespaces)
 
-  cdap_rest_apis = {
-    "stream": "/streams",
-    "dataset": "/data/datasets",
-    "artifact": "/artifacts",
-    "application": "/apps",
-  }
-
-  for ns in entities:
-    for entity_type, entity_url in cdap_rest_apis.iteritems():
-      full_url = namespace_url + "/" + ns + entity_url
-      items = _call_cdap_api(full_url)
-
-      if entity_type == "application":
-        entities[ns][entity_type] = {}
-        ENTITIES_ALL[ns][entity_type] = {}
-        # Application has addtional hierarchy
-        for item in items:
-          programs = _call_cdap_api(full_url + "/" + item["name"])["programs"]
-          program_dict = dict()
-          for program in programs:
-            if program["type"] not in program_dict:
-              program_dict[program["type"].lower()] = list()
-            program_dict[program["type"].lower()].append(program)
-          entities[ns][entity_type][item["name"]] = program_dict
-          ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, {p["name"]: p})
-                                                             for p_type, programs in program_dict.iteritems()
-                                                             for p in programs)
-          ENTITIES_ALL[ns][entity_type][item["name"]].update(item)
-      else:
-        entities[ns][entity_type] = [item.get("name") for item in items]
-        ENTITIES_ALL[ns][entity_type] = dict((item.get("name"), item) for item in items)
+  # cdap_rest_apis = {
+  #   "stream": "/streams",
+  #   "dataset": "/data/datasets",
+  #   "artifact": "/artifacts",
+  #   "application": "/apps",
+  # }
+  #
+  # for ns in entities:
+  #   for entity_type, entity_url in cdap_rest_apis.iteritems():
+  #     full_url = namespace_url + "/" + ns + entity_url
+  #     items = _call_cdap_api(full_url)
+  #
+  #     if entity_type == "application":
+  #       entities[ns][entity_type] = {}
+  #       ENTITIES_ALL[ns][entity_type] = {}
+  #       # Application has addtional hierarchy
+  #       for item in items:
+  #         programs = _call_cdap_api(full_url + "/" + item["name"])["programs"]
+  #         program_dict = dict()
+  #         for program in programs:
+  #           if program["type"] not in program_dict:
+  #             program_dict[program["type"].lower()] = list()
+  #           program_dict[program["type"].lower()].append(program)
+  #         entities[ns][entity_type][item["name"]] = program_dict
+  #         ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, {p["name"]: p})
+  #                                                            for p_type, programs in program_dict.iteritems()
+  #                                                            for p in programs)
+  #         ENTITIES_ALL[ns][entity_type][item["name"]].update(item)
+  #     else:
+  #       entities[ns][entity_type] = [item.get("name") for item in items]
+  #       ENTITIES_ALL[ns][entity_type] = dict((item.get("name"), item) for item in items)
 
   return render('index.mako', request, dict(date2="testjson", entities=entities))
 
