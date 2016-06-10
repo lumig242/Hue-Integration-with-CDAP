@@ -45,7 +45,6 @@ function refreshRoleTable() {
         group: item.groups.join(","),
       });
     });
-    console.log(dataField);
     $(".list-role-table").bootstrapTable({
     columns: [{
                field: 'state',
@@ -74,6 +73,7 @@ function deleteRole() {
 
 function saveRole() {
   $.get("/cdap/create_role/" + $("#new-rolename").val(), function(){
+    $(".list-role-table").bootstrapTable('destroy');
     refreshRoleTable();
   });
 }
