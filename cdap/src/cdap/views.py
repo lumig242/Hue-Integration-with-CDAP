@@ -29,7 +29,7 @@ from collections import defaultdict
 
 LOG = logging.getLogger(__name__)
 # BASE_URL = "http://{}:{}/{}".format(CDAP_API_HOST.get(), CDAP_API_PORT.get(), CDAP_API_VERSION.get())
-BASE_URL = "http://hue29208-1000.dev.continuuity.net:10000/v3"
+BASE_URL = "http://hue-security9535-1000.dev.continuuity.net:10000/v3"
 CDAP_CLIENT = auth_client(BASE_URL)
 ENTITIES_ALL = dict()
 

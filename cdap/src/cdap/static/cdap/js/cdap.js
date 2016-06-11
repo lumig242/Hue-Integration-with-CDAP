@@ -78,6 +78,11 @@ function saveRole() {
   });
 }
 
+
+$('.list-role-table').on('click-row.bs.table', function (event, row, element) {
+  console.log(row.role);
+});
+
 $(".nav-privilege").on("click", function(){
   $(".privilege-management").show();
   $(".role-management").hide();
