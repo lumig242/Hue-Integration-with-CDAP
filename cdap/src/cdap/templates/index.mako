@@ -234,65 +234,71 @@ ${shared.menubar(section='mytab')}
       <script type="text/javascript" src="/static/cdap/js/cdap.js"></script>
 
 
-      <script>
-        $(document).ready(function () {
-          $('.myModal').on('show.bs.modal', function (e) {
-            $('.myModal').css("width", "700px");
-          })
-          $('.myModal').on('hidden.bs.modal', function (e) {
-            $('.myModal').css("width", "0px");
-          })
+<script>
+  $(document).ready(function () {
 
-          $(".user-group").on("change", function () {
-            setPrivCheckbox();
-          });
+    $('.list-role-table').on('click-row.bs.table', function (event, row, element) {
+      console.log(row.role);
+      updateRoleACL(row.role);
+    });
 
-          if ($(".is_authenticated").text() == "False") {
-            $("#popup").modal();
-          }
+    $('.myModal').on('show.bs.modal', function (e) {
+      $('.myModal').css("width", "700px");
+    })
+    $('.myModal').on('hidden.bs.modal', function (e) {
+      $('.myModal').css("width", "0px");
+    })
 
-          $('#jstree').on('changed.jstree', function (e, data) {
-            var r = data.instance.get_node(data.selected[data.selected.length - 1])
-            entityClicked(r, data);
-          })
+    $(".user-group").on("change", function () {
+      setPrivCheckbox();
+    });
 
-          $('#jstree').jstree(
-              {
-                "core": {
-                  "animation": 0,
-                  "check_callback": true,
-                  "themes": {
-                    "stripes": true, "theme": "default",
-                    "dots": true,
-                    "icons": true
-                  },
+    if ($(".is_authenticated").text() == "False") {
+      $("#popup").modal();
+    }
 
-                },
-                "types": {
-                  "#": {
-                    "max_children": 1,
-                    "max_depth": 4,
-                    "valid_children": ["root"]
-                  },
-                  "root": {
-                    "icon": "/static/3.3.1/assets/images/tree_icon.png",
-                    "valid_children": ["default"]
-                  },
-                  "default": {
-                    "valid_children": ["default"]
-                  },
-                  "file": {
-                    "icon": "glyphicon glyphicon-file",
-                    "valid_children": []
-                  }
-                },
-                "plugins": [
-                  "search", "types", "wholerow"
-                ]
-              });
-          $('#jstree').jstree("open_node", $(".jstree-anchor"));
+    $('#jstree').on('changed.jstree', function (e, data) {
+      var r = data.instance.get_node(data.selected[data.selected.length - 1])
+      entityClicked(r, data);
+    })
 
+    $('#jstree').jstree(
+        {
+          "core": {
+            "animation": 0,
+            "check_callback": true,
+            "themes": {
+              "stripes": true, "theme": "default",
+              "dots": true,
+              "icons": true
+            },
+
+          },
+          "types": {
+            "#": {
+              "max_children": 1,
+              "max_depth": 4,
+              "valid_children": ["root"]
+            },
+            "root": {
+              "icon": "/static/3.3.1/assets/images/tree_icon.png",
+              "valid_children": ["default"]
+            },
+            "default": {
+              "valid_children": ["default"]
+            },
+            "file": {
+              "icon": "glyphicon glyphicon-file",
+              "valid_children": []
+            }
+          },
+          "plugins": [
+            "search", "types", "wholerow"
+          ]
         });
-      </script>
+    $('#jstree').jstree("open_node", $(".jstree-anchor"));
+
+  });
+</script>
 
 ${commonfooter(request, messages) | n,unicode}

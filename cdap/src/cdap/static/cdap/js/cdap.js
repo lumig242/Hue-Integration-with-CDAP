@@ -257,8 +257,3 @@ function deletePrivilegeByRole(element){
     },
   });
 }
-
-$('.list-role-table').on('click-row.bs.table', function (event, row, element) {
-  console.log(row.role);
-  updateRoleACL(row.role);
-});
