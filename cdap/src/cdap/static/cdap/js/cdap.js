@@ -233,7 +233,7 @@ function updateRoleACL(role) {
   $("#role-acl-table-body").empty();
   $.get("/cdap/list_privileges_by_role/" + role, function (data) {
     data.forEach(function(privilege){
-        $("#role-acl-table-body").append("<tr><td>" + privilege.authorizables + "</td><td>"
+        $("#role-acl-table-body").append("<tr><td>" + privilege.authorizables.split("/").slice(3).join("/") + "</td><td>"
         + privilege.actions + "</td>" + template + "<td></td></tr>");
 
     });
@@ -242,7 +242,7 @@ function updateRoleACL(role) {
 
 
 function deletePrivilegeByRole(element){
-  var tr = a.parentElement.parentElement.parentElement;
+  var tr = element.parentElement.parentElement.parentElement;
   var path = tr.children[0].textContent;
   var action = tr.children[1].textContent;
   var role = $('.selected-role').text();
@@ -252,7 +252,7 @@ function deletePrivilegeByRole(element){
     url: "/cdap/revoke",
     data: {"role": role, "actions": [action], "path": path},
     success: function (data) {
-      updateRoleACL(role);
+      tr.remove();
       $("body").css("cursor", "default");
     },
   });
