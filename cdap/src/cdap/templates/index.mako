@@ -137,7 +137,23 @@ ${shared.menubar(section='mytab')}
         </div>
 
 
-        <div class="span4"><h3>Hehe</h3></div>
+        <div class="span4">
+          <h3>ACLs</h3>
+            <div class="role-acl-listing">
+              <table class="table table-striped">
+                <thead>
+                <tr>
+                  <th>Path</th>
+                  <th>Action</th>
+                  <th>Operation</th>
+                </tr>
+                </thead>
+                <tbody id="role-acl-table-body">
+                </tbody>
+              </table>
+            </div>
+
+        </div>
       </div>
       </div>
     </div>

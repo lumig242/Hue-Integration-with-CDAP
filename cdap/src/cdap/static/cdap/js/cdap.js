@@ -35,54 +35,6 @@ $(".nav-role").on("click", function(){
   refreshRoleTable();
 });
 
-function refreshRoleTable() {
-  $.get("/cdap/list_roles_by_group", function(data){
-    var dataField = [];
-    data.forEach(function(item){
-      dataField.push({
-        state : false,
-        role: item.name,
-        group: item.groups.join(","),
-      });
-    });
-    $(".list-role-table").bootstrapTable({
-    columns: [{
-               field: 'state',
-                checkbox: true,
-                align: 'center',
-    }, {
-        field: 'role',
-        title: 'Name'
-    }, {
-        field: 'group',
-        title: 'Group'
-    }],
-    data: dataField
-    });
-  });
-}
-
-function deleteRole() {
-  var selections = $(".list-role-table").bootstrapTable('getAllSelections');
-  selections.forEach(function(item){
-    $.get("/cdap/drop_role/" + item.role, function(){
-      $(".list-role-table").bootstrapTable('remove', {field:"role", values:[item.role]})
-    });
-  });
-}
-
-function saveRole() {
-  $.get("/cdap/create_role/" + $("#new-rolename").val(), function(){
-    $(".list-role-table").bootstrapTable('destroy');
-    refreshRoleTable();
-  });
-}
-
-
-$('.list-role-table').on('click-row.bs.table', function (event, row, element) {
-  console.log(row.role);
-});
-
 $(".nav-privilege").on("click", function(){
   $(".privilege-management").show();
   $(".role-management").hide();
@@ -231,4 +183,64 @@ function setPrivCheckbox() {
 }
 
 
-/* Related to Role management */
+/* Role management */
+function refreshRoleTable() {
+  $.get("/cdap/list_roles_by_group", function(data){
+    var dataField = [];
+    data.forEach(function(item){
+      dataField.push({
+        state : false,
+        role: item.name,
+        group: item.groups.join(","),
+      });
+    });
+    $(".list-role-table").bootstrapTable({
+    columns: [{
+               field: 'state',
+                checkbox: true,
+                align: 'center',
+    }, {
+        field: 'role',
+        title: 'Name'
+    }, {
+        field: 'group',
+        title: 'Group'
+    }],
+    data: dataField
+    });
+  });
+}
+
+function deleteRole() {
+  var selections = $(".list-role-table").bootstrapTable('getAllSelections');
+  selections.forEach(function(item){
+    $.get("/cdap/drop_role/" + item.role, function(){
+      $(".list-role-table").bootstrapTable('remove', {field:"role", values:[item.role]})
+    });
+  });
+}
+
+function saveRole() {
+  $.get("/cdap/create_role/" + $("#new-rolename").val(), function(){
+    $(".list-role-table").bootstrapTable('destroy');
+    refreshRoleTable();
+  });
+}
+
+function updateRoleACL(role) {
+  var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true" onclick=""></i></a> ' +
+    '<a><i class="fa fa-trash pointer" aria-hidden="true" onclick="" style="padding-left: 8px"></i></a> </td>';
+  $("#role-acl-table-body").empty();
+  $.get("/cdap/list_privileges_by_role/" + role, function (data) {
+    for (var privilege in data) {
+      $("#acl-table-body").append("<tr><td>" + privilege.authorizables + "</td><td>"
+        + privilege.actions + "</td>" + template + "<td></td></tr>");
+    }
+  });
+}
+
+
+$('.list-role-table').on('click-row.bs.table', function (event, row, element) {
+  console.log(row.role);
+  updateRoleACL(role);
+});
