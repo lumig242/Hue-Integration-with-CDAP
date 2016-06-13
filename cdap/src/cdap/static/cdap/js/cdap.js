@@ -184,7 +184,19 @@ function setPrivCheckbox() {
 
 
 /* Role management */
+function getGroupMultiSelector(role) {
+  $.get("/cdap/list_all_groups", function(groups){
+    var select = '<select class="group-selector" data-placeholder="None..." style="width:350px;" multiple>';
+    groups.forEach(function(group){
+      select += $('<option></option>').val(group).html(group);
+    });
+    select += "</select>";
+  });
+}
+
+
 function refreshRoleTable() {
+  $(".list-role-table").bootstrapTable('destroy');
   $.get("/cdap/list_roles_by_group", function(data){
     var dataField = [];
     data.forEach(function(item){
@@ -240,7 +252,6 @@ function updateRoleACL(role) {
   });
 }
 
-
 function deletePrivilegeByRole(element){
   var tr = element.parentElement.parentElement.parentElement;
   var path = tr.children[0].textContent;
@@ -256,4 +267,18 @@ function deletePrivilegeByRole(element){
       $("body").css("cursor", "default");
     },
   });
+}
+
+
+function editRole(){
+  var selections = $(".list-role-table").bootstrapTable('getAllSelections');
+  if(selections.length == 0)  return;
+  $.get("/cdap/list_all_groups", function(groups){
+    groups.forEach(function(group){
+      $(".group-selector").append($('<option></option>').val(group).html(group));
+    });
+    $(".group-selector").chosen();
+    $('#edit-role-popup').modal();
+  });
+
 }

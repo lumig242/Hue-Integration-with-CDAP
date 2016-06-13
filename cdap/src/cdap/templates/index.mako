@@ -8,6 +8,7 @@ ${shared.menubar(section='mytab')}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
 <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.5.1/chosen.min.css">
 <link rel="stylesheet" href="/static/cdap/css/cdap.css">
 
 <style>
@@ -126,12 +127,15 @@ ${shared.menubar(section='mytab')}
             <button type="button" class="btn btn-default" onclick="$('#new-role-popup').modal();">
               <i class="glyphicon glyphicon-plus"></i>
             </button>
+            <button type="button" class="btn btn-default" onclick="editRole()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
             <button type="button" class="btn btn-default" onclick="deleteRole()">
               <i class="glyphicon glyphicon-trash"></i>
             </button>
           </div>
           <table class="table table-condensed list-role-table " data-toolbar="#toolbar"
-                 data-search="true" data-show-refresh="true" data-show-toggle="true"
+                 data-search="true" data-show-toggle="true"
                  data-minimum-count-columns="2">
           </table>
         </div>
@@ -152,6 +156,13 @@ ${shared.menubar(section='mytab')}
                 </tbody>
               </table>
             </div>
+
+                <select class="hehehehehe" data-placeholder="None..." style="width:350px;" multiple>
+                  <option value="United States">United States</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="Afghanistan">Afghanistan</option>
+                  <option value="Albania">Albania</option>
+                </select>
 
         </div>
       </div>
@@ -224,6 +235,21 @@ ${shared.menubar(section='mytab')}
       </div>
     </div>
 
+    <div class="modal fade myModal" id="edit-role-popup" role="dialog">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Edit Group for Role</h4>
+      </div>
+      <div class="modal-body">
+        <div id="edit-pop-role-name" type="text"/>
+        <select class="group-selector" data-placeholder="None..." style="width:350px;" multiple>;
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button onclick="saveRole()" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -231,6 +257,7 @@ ${shared.menubar(section='mytab')}
       <script type="text/javascript"
               src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
       <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.5.1/chosen.jquery.min.js"></script>
       <script type="text/javascript" src="/static/cdap/js/cdap.js"></script>
 
 

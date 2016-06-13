@@ -303,6 +303,4 @@ def drop_role(request, role_name):
 
 
 def list_all_groups(request):
-  print "========"
-  print Group.objects.all()
-  return HttpResponse(json.dump(Group.objects.all()), content_type="application/json")
+  return HttpResponse(json.dumps([group.name for group in Group.objects.all()]), content_type="application/json")
