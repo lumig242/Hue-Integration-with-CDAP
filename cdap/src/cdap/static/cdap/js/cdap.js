@@ -228,19 +228,37 @@ function saveRole() {
 }
 
 function updateRoleACL(role) {
-  var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true" onclick=""></i></a> ' +
-    '<a><i class="fa fa-trash pointer" aria-hidden="true" onclick="" style="padding-left: 8px"></i></a> </td>';
+  $('.selected-role').html(role);
+  var template = '<td><a><i class="fa fa-trash pointer" aria-hidden="true" onclick="deletePrivilegeByRole(this)" style="padding-left: 8px"></i></a> </td>';
   $("#role-acl-table-body").empty();
   $.get("/cdap/list_privileges_by_role/" + role, function (data) {
-    for (var privilege in data) {
-      $("#acl-table-body").append("<tr><td>" + privilege.authorizables + "</td><td>"
+    data.forEach(function(privilege){
+        $("#role-acl-table-body").append("<tr><td>" + privilege.authorizables + "</td><td>"
         + privilege.actions + "</td>" + template + "<td></td></tr>");
-    }
+
+    });
   });
 }
 
 
+function deletePrivilegeByRole(element){
+  var tr = a.parentElement.parentElement.parentElement;
+  var path = tr.children[0].textContent;
+  var action = tr.children[1].textContent;
+  var role = $('.selected-role').text();
+  $("body").css("cursor", "progress");
+  $.ajax({
+    type: "POST",
+    url: "/cdap/revoke",
+    data: {"role": role, "actions": [action], "path": path},
+    success: function (data) {
+      updateRoleACL(role);
+      $("body").css("cursor", "default");
+    },
+  });
+}
+
 $('.list-role-table').on('click-row.bs.table', function (event, row, element) {
   console.log(row.role);
-  updateRoleACL(role);
+  updateRoleACL(row.role);
 });

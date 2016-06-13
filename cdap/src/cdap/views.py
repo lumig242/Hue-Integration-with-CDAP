@@ -228,7 +228,7 @@ def list_privileges_by_role(request, role):
   :return: A Json array of SentryPrivileges: [p1, p2, p3...]
   """
   sentry_privileges = get_api(request.user, "cdap").list_sentry_privileges_by_role("cdap", role)
-  sentry_privileges = [{"actions":p["actions"], "authorizables":_sentry_authorizables_to_path(p["authorizables"])}
+  sentry_privileges = [{"actions":p["action"], "authorizables":_sentry_authorizables_to_path(p["authorizables"])}
                        for p in sentry_privileges]
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 

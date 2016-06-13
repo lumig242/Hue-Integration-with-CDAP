@@ -138,14 +138,14 @@ ${shared.menubar(section='mytab')}
 
 
         <div class="span4">
-          <h3>ACLs</h3>
+          <h3 class="selected-role">ACLs</h3>
             <div class="role-acl-listing">
               <table class="table table-striped">
                 <thead>
                 <tr>
                   <th>Path</th>
                   <th>Action</th>
-                  <th>Operation</th>
+                  <th>Delete</th>
                 </tr>
                 </thead>
                 <tbody id="role-acl-table-body">
