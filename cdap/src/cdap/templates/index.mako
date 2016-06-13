@@ -263,7 +263,7 @@ ${shared.menubar(section='mytab')}
 
     $('.myModal').on('show.bs.modal', function (e) {
       $('.myModal').css("width", "700px");
-      $('.myModal').css("z-index", "10");
+      $('.myModal').css("z-index", "100000");
     })
     $('.myModal').on('hidden.bs.modal', function (e) {
       $('.myModal').css("width", "0px");
