@@ -20,6 +20,7 @@ from desktop.lib.django_util import render
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponse, HttpResponseServerError
 from cdap.client import auth_client
 from cdap.conf import CDAP_API_HOST, CDAP_API_PORT, CDAP_API_VERSION
+from django.contrib.auth.models import Group
 from libsentry.api2 import get_api
 
 import urllib2
@@ -299,3 +300,9 @@ def drop_role(request, role_name):
   """
   get_api(request.user, "cdap").drop_sentry_role(role_name)
   return HttpResponse()
+
+
+def list_all_groups(request):
+  print "========"
+  print Group.objects.all()
+  return HttpResponse(json.dump(Group.objects.all()), content_type="application/json")
