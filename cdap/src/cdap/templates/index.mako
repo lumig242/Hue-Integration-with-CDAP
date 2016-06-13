@@ -156,14 +156,6 @@ ${shared.menubar(section='mytab')}
                 </tbody>
               </table>
             </div>
-
-                <select class="hehehehehe" data-placeholder="None..." style="width:350px;" multiple>
-                  <option value="United States">United States</option>
-                  <option value="United Kingdom">United Kingdom</option>
-                  <option value="Afghanistan">Afghanistan</option>
-                  <option value="Albania">Albania</option>
-                </select>
-
         </div>
       </div>
       </div>
@@ -246,7 +238,7 @@ ${shared.menubar(section='mytab')}
         </select>
       </div>
       <div class="modal-footer">
-        <button onclick="saveRole()" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
+        <button onclick="" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
       </div>
     </div>
 
@@ -271,9 +263,11 @@ ${shared.menubar(section='mytab')}
 
     $('.myModal').on('show.bs.modal', function (e) {
       $('.myModal').css("width", "700px");
+      $('.myModal').css("z-index", "10");
     })
     $('.myModal').on('hidden.bs.modal', function (e) {
       $('.myModal').css("width", "0px");
+      $('.myModal').css("z-index", "-10");
     })
 
     $(".user-group").on("change", function () {

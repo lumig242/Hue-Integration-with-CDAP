@@ -273,12 +273,22 @@ function deletePrivilegeByRole(element){
 function editRole(){
   var selections = $(".list-role-table").bootstrapTable('getAllSelections');
   if(selections.length == 0)  return;
+  var item = selections[0];
+  var affGroups = item.group.split(",");
   $.get("/cdap/list_all_groups", function(groups){
     groups.forEach(function(group){
-      $(".group-selector").append($('<option></option>').val(group).html(group));
+      if(affGroups.indexOf(group) == -1){
+        var option = $('<option></option>').val(group).html(group);
+      }else{
+        var option = $('<option selected></option>').val(group).html(group);
+      }
+      $(".group-selector").append(option);
     });
-    $(".group-selector").chosen();
+
+    $('#edit-role-popup').on('shown.bs.modal', function () {
+      $(".group-selector").trigger("chosen:updated");
+      $(".group-selector").chosen();
+    });
     $('#edit-role-popup').modal();
   });
-
 }
