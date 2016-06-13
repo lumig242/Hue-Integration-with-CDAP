@@ -66,6 +66,16 @@ def _sentry_authorizables_to_path(authorizables):
   return "/".join(path)
 
 
+def _filter_list_roles_by_group(api):
+  """
+  A helper function to filter the list_sentry_roles_by_group api from sentry
+  Since all the role name start with "." is generate by default,
+   they will not be presented to users.
+  :return:
+  """
+  roles = api.list_sentry_roles_by_group()
+  return filter(lambda item: not item["name"].startswith("."), roles)
+
 ##############################################################
 # Router functions goes here
 ##############################################################
@@ -147,7 +157,7 @@ def details(request, path):
 
   api = get_api(request.user, "cdap")
   # Fetch all the privileges from sentry first
-  roles = [result["name"] for result in api.list_sentry_roles_by_group()]
+  roles = [result["name"] for result in _filter_list_roles_by_group(api)]
   privileges = {}
   path = _path_to_sentry_authorizables(path)
   for role in roles:
@@ -216,7 +226,7 @@ def list_roles_by_group(request):
       "groups": [group1, group2, group3...]
     }
   """
-  sentry_privileges = get_api(request.user, "cdap").list_sentry_roles_by_group()
+  sentry_privileges = _filter_list_roles_by_group(get_api(request.user, "cdap"))
   return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
 
 
@@ -241,7 +251,7 @@ def list_privileges_by_group(request, group):
   :return: A Json array of SentryPrivileges: [p1, p2, p3...]
   """
   api = get_api(request.user, "cdap")
-  sentry_privileges = api.list_sentry_roles_by_group()
+  sentry_privileges = _filter_list_roles_by_group(api)
   # Construct a dcitionary like {groupname:[role1,role2,role3]}
   reverse_group_role_dict = dict()
   for item in sentry_privileges:
