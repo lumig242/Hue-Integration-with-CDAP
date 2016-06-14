@@ -270,11 +270,16 @@ function deletePrivilegeByRole(element){
 }
 
 
-function editRole(){
+function editRole() {
+  $(".group-selector").empty();
+  $(".group-selector").trigger("chosen:updated");
+
   var selections = $(".list-role-table").bootstrapTable('getAllSelections');
   if(selections.length == 0)  return;
+
   var item = selections[0];
   var affGroups = item.group.split(",");
+  $("#edit-role-modal-title").html(item.role);
   $.get("/cdap/list_all_groups", function(groups){
     groups.forEach(function(group){
       if(affGroups.indexOf(group) == -1){
@@ -290,5 +295,28 @@ function editRole(){
       $(".group-selector").chosen();
     });
     $('#edit-role-popup').modal();
+  });
+}
+
+
+function saveEditedRole() {
+  role = $("#edit-role-modal-title").text();
+  var options = $(".group-selector")[0].options;
+  var selected = [];
+  for(var i = 0; i < options.length; i++){
+    if(options[i].selected){
+      console.log(options[i].text);
+      selected.push(options[i].text);
+    }
+  }
+  $.ajax({
+    type: "POST",
+    url: "/cdap/alter_role_by_group",
+    data: {"role": role, "groups": selected}
+  }).done(function () {
+
+    }
+  ).fail(function (data) {
+
   });
 }

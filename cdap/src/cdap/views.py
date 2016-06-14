@@ -304,3 +304,16 @@ def drop_role(request, role_name):
 
 def list_all_groups(request):
   return HttpResponse(json.dumps([group.name for group in Group.objects.all()]), content_type="application/json")
+
+
+def alter_role_by_group(request):
+  role = request.POST["role"]
+  post_groups = set(request.POST.getlist("groups[]"))
+  api = get_api(request.user, "cdap")
+  groups = set([item["groups"] for item in _filter_list_roles_by_group(api) if item["name"] == role][0])
+
+  # newly added groups
+  api.alter_sentry_role_add_groups(post_groups.difference(groups))
+  # deleted groups
+  api.alter_sentry_role_delete_groups(groups.difference(post_groups))
+  return HttpResponse()
