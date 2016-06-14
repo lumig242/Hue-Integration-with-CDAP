@@ -314,9 +314,8 @@ function saveEditedRole() {
     url: "/cdap/alter_role_by_group",
     data: {"role": role, "groups": selected},
   }).done(function () {
-
+    refreshRoleTable();
     }
   ).fail(function (data) {
-
   });
 }
