@@ -30,5 +30,5 @@ urlpatterns = patterns('cdap',
   url(r'^create_role/(?P<role_name>.+)/', 'views.create_role'),
   url(r'^drop_role/(?P<role_name>.+)/', 'views.drop_role'),
   url(r'^list_all_groups/', 'views.list_all_groups'),
-  url(r'^alter_role_by_group/', 'views.alter_role_by_group'),
+  url(r'^alter_role_by_group', 'views.alter_role_by_group'),
 )

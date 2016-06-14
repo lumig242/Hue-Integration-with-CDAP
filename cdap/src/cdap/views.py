@@ -315,9 +315,9 @@ def alter_role_by_group(request):
   # newly added groups
   print "heheh1"
   print post_groups.difference(groups)
-  api.alter_sentry_role_add_groups(post_groups.difference(groups))
+  api.alter_sentry_role_add_groups(role, post_groups.difference(groups))
   # deleted groups
   print "hehe2"
   print groups.difference(post_groups)
-  api.alter_sentry_role_delete_groups(groups.difference(post_groups))
+  api.alter_sentry_role_delete_groups(role, groups.difference(post_groups))
   return HttpResponse()

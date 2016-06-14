@@ -312,7 +312,7 @@ function saveEditedRole() {
   $.ajax({
     type: "POST",
     url: "/cdap/alter_role_by_group",
-    data: {"role": role, "groups": selected}
+    data: {"role": role, "groups": selected},
   }).done(function () {
 
     }
