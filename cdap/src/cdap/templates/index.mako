@@ -85,11 +85,7 @@ ${shared.menubar(section='mytab')}
         <div class="acl-panel">
           <h4 class="acl-heading" id="selected-entity-heading"></h4>
 
-          <ul class="breadcrumb" id="acl-heading-breadcrumb">
-            <li>Home <span class="divider">/</span></li>
-            <li>Library <span class="divider">/</span></li>
-            <li class="active">Data</li>
-          </ul>
+          <ul class="breadcrumb" id="acl-heading-breadcrumb"></ul>
 
           <div class="acl-description">
              <table class="table table-hover table-condensed" id="description-table">
@@ -108,11 +104,10 @@ ${shared.menubar(section='mytab')}
           </div>
 
           <div class="acl-management">
-            <span style="padding-left:8px; font-size: large; font-weight:bold;">ACLs</span>
-            <a>
-              <div class="acl-add-button pull-right pointer" onclick="newACL()"><i class="fa fa-plus create-acl"></i>
-              </div>
-            </a>
+            <span style="padding-left:8px; font-size: large; font-weight:bold;">ACLs
+              <a><div class="acl-add-button pull-right pointer" onclick="newACL()">
+                <i class="fa fa-plus create-acl"></i></div></a>
+            </span>
             <div class="acl-listing">
               <table class="table table-striped">
                 <thead>
