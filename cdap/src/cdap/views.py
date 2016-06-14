@@ -158,21 +158,21 @@ def details(request, path):
   for k in path.strip("/").split("/"):
     item = item[k]
 
-  # api = get_api(request.user, "cdap")
-  # # Fetch all the privileges from sentry first
-  # roles = [result["name"] for result in _filter_list_roles_by_group(api)]
-  # privileges = {}
-  # path = _path_to_sentry_authorizables(path)
-  # for role in roles:
-  #   sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
-  #   for privilege in sentry_privilege:
-  #     if _match_authorizables(privilege["authorizables"], path):
-  #       if role not in privileges:
-  #         privileges[role] = defaultdict(list)
-  #       privileges[role]["actions"].append(privilege["action"])
-  #
-  #
-  # item["privileges"] = privileges
+  api = get_api(request.user, "cdap")
+  # Fetch all the privileges from sentry first
+  roles = [result["name"] for result in _filter_list_roles_by_group(api)]
+  privileges = {}
+  path = _path_to_sentry_authorizables(path)
+  for role in roles:
+    sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
+    for privilege in sentry_privilege:
+      if _match_authorizables(privilege["authorizables"], path):
+        if role not in privileges:
+          privileges[role] = defaultdict(list)
+        privileges[role]["actions"].append(privilege["action"])
+
+
+  item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
 
 
