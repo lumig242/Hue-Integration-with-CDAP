@@ -238,7 +238,7 @@ ${shared.menubar(section='mytab')}
         </select>
       </div>
       <div class="modal-footer">
-        <button onclick="" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
+        <button onclick="saveEditedRole()" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
       </div>
     </div>
 
