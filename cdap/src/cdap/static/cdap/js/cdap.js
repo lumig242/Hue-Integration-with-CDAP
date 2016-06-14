@@ -58,6 +58,14 @@ function entityClicked(entity, data) {
     treeStructString = "/" + parentText + treeStructString;
   }
   $('.acl-heading').html(treeStructString.substring(1, treeStructString.length));
+  $('#acl-heading-breadcrumb').empty();
+  var dividerSpan = '<span class="divider">/</span>';
+  var entities = treeStructString.split("/");
+  for (var i=1; i < entities.length-1; i++){
+    $('#acl-heading-breadcrumb').append("<li><a>"+ entities[i] + " " + dividerSpan + "</a></li>");
+  }
+  $('#acl-heading-breadcrumb').append('<li class="active">'+ entities[entities.length-1]  + '</li>');
+
   refresfDetail(treeStructString);
 }
 
@@ -65,9 +73,19 @@ function refresfDetail(treeStructString) {
 
   var template = '<td> <a><i class="fa fa-pencil-square-o pointer" aria-hidden="true" onclick="editACL(this)"></i></a> ' +
     '<a><i class="fa fa-trash pointer" aria-hidden="true" onclick="delACL(this)" style="padding-left: 8px"></i></a> </td>';
+  // Fetch entity details and privileges from backend api
   $.get("/cdap/details" + treeStructString, function (data) {
+    $("#description-table-body").empty();
+    var properties = ["name", "version", "id", "type", "scope", "description"];
+    //var description = {};
+    properties.forEach(function(prop){
+      if(data[prop]){
+        //description[prop] = data[prop];
+        $("#description-table-body").append("<tr><td>" + prop + "</td><td>" + data[prop]) + "</td></tr>";
+      }
+    });
+    //$(".acl-description").JSONView(description, {collapsed: true});
     $("#acl-table-body").empty();
-    $(".acl-description").JSONView(data, {collapsed: true});
     privileges = data["privileges"];
     for (var role in privileges) {
       $("#acl-table-body").append("<tr><td>" + role + "</td><td>" + privileges[role]["actions"].unique().join(",") + "</td>" + template + "<td></td></tr>");

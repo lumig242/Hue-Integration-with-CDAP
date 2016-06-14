@@ -84,7 +84,29 @@ ${shared.menubar(section='mytab')}
       <div class="span4">
         <div class="acl-panel">
           <h4 class="acl-heading" id="selected-entity-heading"></h4>
-          <div class="acl-description" id="json-view"></div>
+
+          <ul class="breadcrumb" id="acl-heading-breadcrumb">
+            <li>Home <span class="divider">/</span></li>
+            <li>Library <span class="divider">/</span></li>
+            <li class="active">Data</li>
+          </ul>
+
+          <div class="acl-description">
+             <table class="table table-hover table-condensed" id="description-table">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+               <tbody id="description-table-body">
+                <tr><td></td><td></td></tr>
+                <tr><td></td><td></td></tr>
+                <tr><td></td><td></td></tr>
+               </tbody>
+             </table>
+          </div>
+
           <div class="acl-management">
             <span style="padding-left:8px; font-size: large; font-weight:bold;">ACLs</span>
             <a>
@@ -101,19 +123,20 @@ ${shared.menubar(section='mytab')}
                 </tr>
                 </thead>
                 <tbody id="acl-table-body">
+                  <tr><td></td><td></td><td></td></tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div class="list-by-group">
-            <br/>
-            <h4>List privileges by group</h4>
-            <input class="btn-list-by-group"></input>
-            <div class="json-list-by-group" id="json-view"></div>
-            <div>
-            </div>
-          </div>
+##           <div class="list-by-group">
+##             <br/>
+##             <h4>List privileges by group</h4>
+##             <input class="btn-list-by-group"></input>
+##             <div class="json-list-by-group" id="json-view"></div>
+##             <div>
+##             </div>
+##           </div>
 
         </div>
       % endif

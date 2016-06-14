@@ -105,37 +105,37 @@ def index(request):
   entities = dict((ns.get("name"), dict()) for ns in namespaces)
   ENTITIES_ALL = dict((ns.get("name"), ns) for ns in namespaces)
 
-  # cdap_rest_apis = {
-  #   "stream": "/streams",
-  #   "dataset": "/data/datasets",
-  #   "artifact": "/artifacts",
-  #   "application": "/apps",
-  # }
-  #
-  # for ns in entities:
-  #   for entity_type, entity_url in cdap_rest_apis.iteritems():
-  #     full_url = namespace_url + "/" + ns + entity_url
-  #     items = _call_cdap_api(full_url)
-  #
-  #     if entity_type == "application":
-  #       entities[ns][entity_type] = {}
-  #       ENTITIES_ALL[ns][entity_type] = {}
-  #       # Application has addtional hierarchy
-  #       for item in items:
-  #         programs = _call_cdap_api(full_url + "/" + item["name"])["programs"]
-  #         program_dict = dict()
-  #         for program in programs:
-  #           if program["type"] not in program_dict:
-  #             program_dict[program["type"].lower()] = list()
-  #           program_dict[program["type"].lower()].append(program)
-  #         entities[ns][entity_type][item["name"]] = program_dict
-  #         ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, {p["name"]: p})
-  #                                                            for p_type, programs in program_dict.iteritems()
-  #                                                            for p in programs)
-  #         ENTITIES_ALL[ns][entity_type][item["name"]].update(item)
-  #     else:
-  #       entities[ns][entity_type] = [item.get("name") for item in items]
-  #       ENTITIES_ALL[ns][entity_type] = dict((item.get("name"), item) for item in items)
+  cdap_rest_apis = {
+    "stream": "/streams",
+    "dataset": "/data/datasets",
+    "artifact": "/artifacts",
+    "application": "/apps",
+  }
+
+  for ns in entities:
+    for entity_type, entity_url in cdap_rest_apis.iteritems():
+      full_url = namespace_url + "/" + ns + entity_url
+      items = _call_cdap_api(full_url)
+
+      if entity_type == "application":
+        entities[ns][entity_type] = {}
+        ENTITIES_ALL[ns][entity_type] = {}
+        # Application has addtional hierarchy
+        for item in items:
+          programs = _call_cdap_api(full_url + "/" + item["name"])["programs"]
+          program_dict = dict()
+          for program in programs:
+            if program["type"] not in program_dict:
+              program_dict[program["type"].lower()] = list()
+            program_dict[program["type"].lower()].append(program)
+          entities[ns][entity_type][item["name"]] = program_dict
+          ENTITIES_ALL[ns][entity_type][item["name"]] = dict((p_type, {p["name"]: p})
+                                                             for p_type, programs in program_dict.iteritems()
+                                                             for p in programs)
+          ENTITIES_ALL[ns][entity_type][item["name"]].update(item)
+      else:
+        entities[ns][entity_type] = [item.get("name") for item in items]
+        ENTITIES_ALL[ns][entity_type] = dict((item.get("name"), item) for item in items)
 
   return render('index.mako', request, dict(date2="testjson", entities=entities))
 
@@ -158,21 +158,21 @@ def details(request, path):
   for k in path.strip("/").split("/"):
     item = item[k]
 
-  api = get_api(request.user, "cdap")
-  # Fetch all the privileges from sentry first
-  roles = [result["name"] for result in _filter_list_roles_by_group(api)]
-  privileges = {}
-  path = _path_to_sentry_authorizables(path)
-  for role in roles:
-    sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
-    for privilege in sentry_privilege:
-      if _match_authorizables(privilege["authorizables"], path):
-        if role not in privileges:
-          privileges[role] = defaultdict(list)
-        privileges[role]["actions"].append(privilege["action"])
-
-
-  item["privileges"] = privileges
+  # api = get_api(request.user, "cdap")
+  # # Fetch all the privileges from sentry first
+  # roles = [result["name"] for result in _filter_list_roles_by_group(api)]
+  # privileges = {}
+  # path = _path_to_sentry_authorizables(path)
+  # for role in roles:
+  #   sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
+  #   for privilege in sentry_privilege:
+  #     if _match_authorizables(privilege["authorizables"], path):
+  #       if role not in privileges:
+  #         privileges[role] = defaultdict(list)
+  #       privileges[role]["actions"].append(privilege["action"])
+  #
+  #
+  # item["privileges"] = privileges
   return HttpResponse(json.dumps(item), content_type="application/json")
 
 

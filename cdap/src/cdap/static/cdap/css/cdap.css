@@ -44,6 +44,7 @@ Customized CSS style
     margin-top: 0px;
     padding-top: 0px;
     word-wrap: break-word;
+    display: None;
 }
 
 #jstree {
@@ -90,9 +91,15 @@ Customized CSS style
 }
 
 .acl-management {
-    margin-top: 5px;
+    margin-top: 15px;
 }
 
 .role-management {
     display: None;
+}
+
+.breadcrumb {
+    padding: 0;
+    margin-left: 3px;
+    margin-bottom: 15px;
 }
