@@ -307,7 +307,7 @@ def list_all_groups(request):
 
 
 def alter_role_by_group(request):
-  role = request.POST["role"]
+  role = request.POST.get("role")
   post_groups = set(request.POST.getlist("groups[]"))
   api = get_api(request.user, "cdap")
   groups = set([item["groups"] for item in _filter_list_roles_by_group(api) if item["name"] == role][0])
