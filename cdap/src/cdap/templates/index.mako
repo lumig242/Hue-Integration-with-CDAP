@@ -9,6 +9,7 @@ ${shared.menubar(section='mytab')}
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
 <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.5.1/chosen.min.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/jquery.amaran/0.5.4/amaran.min.css">
 <link rel="stylesheet" href="/static/cdap/css/cdap.css">
 
 <style>
@@ -84,13 +85,30 @@ ${shared.menubar(section='mytab')}
       <div class="span4">
         <div class="acl-panel">
           <h4 class="acl-heading" id="selected-entity-heading"></h4>
-          <div class="acl-description" id="json-view"></div>
+
+          <ul class="breadcrumb" id="acl-heading-breadcrumb"></ul>
+
+          <div class="acl-description">
+             <table class="table table-hover table-condensed" id="description-table">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+               <tbody id="description-table-body">
+                <tr><td></td><td></td></tr>
+                <tr><td></td><td></td></tr>
+                <tr><td></td><td></td></tr>
+               </tbody>
+             </table>
+          </div>
+
           <div class="acl-management">
-            <span style="padding-left:8px; font-size: large; font-weight:bold;">ACLs</span>
-            <a>
-              <div class="acl-add-button pull-right pointer" onclick="newACL()"><i class="fa fa-plus create-acl"></i>
-              </div>
-            </a>
+            <span style="padding-left:8px; font-size: large; font-weight:bold;">ACLs
+              <a><div class="acl-add-button pull-right pointer" onclick="newACL()">
+                <i class="fa fa-plus create-acl"></i></div></a>
+            </span>
             <div class="acl-listing">
               <table class="table table-striped">
                 <thead>
@@ -101,19 +119,20 @@ ${shared.menubar(section='mytab')}
                 </tr>
                 </thead>
                 <tbody id="acl-table-body">
+                  <tr><td></td><td></td><td></td></tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div class="list-by-group">
-            <br/>
-            <h4>List privileges by group</h4>
-            <input class="btn-list-by-group"></input>
-            <div class="json-list-by-group" id="json-view"></div>
-            <div>
-            </div>
-          </div>
+##           <div class="list-by-group">
+##             <br/>
+##             <h4>List privileges by group</h4>
+##             <input class="btn-list-by-group"></input>
+##             <div class="json-list-by-group" id="json-view"></div>
+##             <div>
+##             </div>
+##           </div>
 
         </div>
       % endif
@@ -244,12 +263,13 @@ ${shared.menubar(section='mytab')}
   </div>
 </div>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
-      <script type="text/javascript"
-              src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
-      <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.5.1/chosen.jquery.min.js"></script>
-      <script type="text/javascript" src="/static/cdap/js/cdap.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.5.1/chosen.jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/jquery.amaran/0.5.4/jquery.amaran.min.js"></script>
+<script type="text/javascript" src="/static/cdap/js/cdap.js"></script>
 
 
 <script>
