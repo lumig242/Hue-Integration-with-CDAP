@@ -56,6 +56,17 @@ def _call_cdap_api(url):
   return CDAP_CLIENT.get(url)
 
 
+def _get_sentry_api(user):
+  """
+  Get the API helper class of sentry
+  :param user: The user of the http request. Must be authorized in Hue to perform sentry operations.
+  :return: API helper class of sentry. Defined in libsentry/api2.py
+  """
+  # Here "cdap" stands for the component to be used in sentry.
+  # Since here the CDAP plugin only deals with CDAP related ACLs, it is hard coded as "cdap" here
+  return get_api(user, "cdap")
+
+
 def _fetch_entites_from_cdap(entities, entities_detail):
   # Iter through entities and fetch the name and description
   for namespace in entities:
@@ -85,6 +96,54 @@ def _fetch_entites_from_cdap(entities, entities_detail):
         entities[namespace][entity_type] = [item['name'] for item in items]
         entities_detail[namespace][entity_type] = dict((item['name'], item) for item in items)
   return entities, entities_detail
+
+
+def _match_authorizables(authorizables, path):
+  return True if path[:len(authorizables)] == authorizables else False
+
+
+def _to_sentry_privilege(action, authorizables):
+  return {
+    "component": "cdap",
+    "serviceName": "cdap",
+    "authorizables": authorizables,
+    "action": action,
+  }
+
+
+def _path_to_sentry_authorizables(path):
+  path = path.strip("/").split("/")
+  path = ["instance", "cdap", "namespace"] + path
+  return [{"type": path[i].upper(), "name": path[i + 1].lower()} for i in xrange(0, len(path), 2)]
+
+
+def _sentry_authorizables_to_path(authorizables):
+  return "/".join(auth[key] for auth in authorizables for key in ("type", "name"))
+
+
+def _filter_list_roles_by_group(api):
+  """
+  A helper function to filter the list_sentry_roles_by_group api from sentry
+  All the role name start with "." is generate by default in CDAP,
+   and they will not be presented to users.
+  """
+  roles = api.list_sentry_roles_by_group()
+  return filter(lambda item: not item["name"].startswith("."), roles)
+
+
+def _get_privileges_for_path(user, path):
+  api = _get_sentry_api(user)
+  roles = [result["nacme"] for result in _filter_list_roles_by_group(api)]
+  privileges = {}
+  authorizable = _path_to_sentry_authorizables(path)
+  for role in roles:
+    sentry_privilege = api.list_sentry_privileges_by_role("cdap", role)
+    for privilege in sentry_privilege:
+      if _match_authorizables(privilege["authorizables"], authorizable):
+        if role not in privileges:
+          privileges[role] = defaultdict(list)
+        privileges[role]["actions"].append(privilege["action"])
+  return privileges
 
 
 ##############################################################
@@ -135,4 +194,104 @@ def details(request, path):
   # The detailed information of entity at path stores in the last dict
   for k in path.strip('/').split('/'):
     item = item[k]
+  item["privileges"] = _get_privileges_for_path(request.user, path)
   return HttpResponse(json.dumps(item), content_type='application/json')
+
+
+@_cdap_error_handler
+def grant_privileges(request):
+  """
+  Grant a list of actions to an entity. Should be a Post Method.
+  :param request: POST DATA{
+    "role":role name of,
+    "actions": a list/array of actions,
+    "path": the path to entity,
+  }
+  """
+  api = _get_sentry_api(request.user)
+  role = request.POST["role"]
+  actions = request.POST.getlist("actions[]")
+  authorizables = _path_to_sentry_authorizables(request.POST["path"])
+  for action in actions:
+    tSentryPrivilege = _to_sentry_privilege(action, authorizables)
+    api.alter_sentry_role_grant_privilege(role, tSentryPrivilege)
+  return HttpResponse()
+
+
+@_cdap_error_handler
+def revoke_privileges(request):
+  """
+  Revoke a list of actions to an entity. Should be a Post Method.
+  :param request: POST DATA{
+    "role":role name of,
+    "actions": a list/array of actions,
+    "path": the path to entity,
+  }
+  :return: If entity privileges cannot be revoked (which indicates the privileges are granted on an entity of higher
+  level), return a Json array of where these privileges are defined.
+  """
+  api = _get_sentry_api(request.user)
+  role = request.POST["role"]
+  actions = request.POST.getlist("actions[]")
+  authorizables = _path_to_sentry_authorizables(request.POST["path"])
+  for action in actions:
+    tSentryPrivilege = _to_sentry_privilege(action, authorizables)
+    api.alter_sentry_role_revoke_privilege(role, tSentryPrivilege)
+  # Check if all the privileges are revoked successfully
+  response_msgs = [_sentry_authorizables_to_path(priv["authorizables"])
+                   for priv in api.list_sentry_privileges_by_role("cdap", role)
+                   if _match_authorizables(priv["authorizables"], authorizables)]
+  return HttpResponse(json.dumps(response_msgs), content_type="application/json")
+
+
+@_cdap_error_handler
+def list_roles_by_group(request):
+  """
+  List sentry roles along with group
+  :param request:
+  :return: A Json struct
+    {
+      "name": role name,
+      "groups": [group1, group2, group3...]
+    }
+  """
+  sentry_privileges = _filter_list_roles_by_group(_get_sentry_api(request.user))
+  return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
+
+
+@_cdap_error_handler
+def list_privileges_by_role(request, role):
+  """
+  List sentry privilegs by role
+  :param request:
+  :param role: role name
+  :return: A Json array of SentryPrivileges: [p1, p2, p3...]
+  """
+  sentry_privileges = _get_sentry_api(request.user).list_sentry_privileges_by_role("cdap", role)
+  sentry_privileges = [{"actions": p["action"], "authorizables": _sentry_authorizables_to_path(p["authorizables"])}
+                       for p in sentry_privileges]
+  return HttpResponse(json.dumps(sentry_privileges), content_type="application/json")
+
+
+@_cdap_error_handler
+def list_privileges_by_group(request, group):
+  """
+  List sentry privileges by group
+  :param request:
+  :param group: group name
+  :return: A Json array of SentryPrivileges: [p1, p2, p3...]
+  """
+  api = _get_sentry_api(request.user)
+  roles = _filter_list_roles_by_group(api)
+
+  # Construct a dcitionary like {groupname:[role1,role2,role3]}
+  reverse_group_role_dict = defaultdict(list)
+  for role in roles:
+    for group in role["groups"]:
+      reverse_group_role_dict[group].append(role["name"])
+
+  response = [api.list_sentry_privileges_by_role("cdap", role)
+              for role in reverse_group_role_dict[group]
+              if group in reverse_group_role_dict]
+  return HttpResponse(json.dumps(response), content_type="application/json")
+
