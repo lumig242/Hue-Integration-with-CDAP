@@ -16,6 +16,7 @@
 #
 
 from desktop.lib.django_util import render
+from django.contrib.auth.models import Group
 from django.core.cache import get_cache
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponse, HttpResponseServerError
 from cdap.client import auth_client
@@ -59,7 +60,7 @@ def _call_cdap_api(url):
 def _get_sentry_api(user):
   """
   Get the API helper class of sentry
-  :param user: The user of the http request. Must be authorized in Hue to perform sentry operations.
+  :param user: The user of the http request. Must be authorized to perform sentry operations (in sentry-site.xml)
   :return: API helper class of sentry. Defined in libsentry/api2.py
   """
   # Here "cdap" stands for the component to be used in sentry.
@@ -98,8 +99,13 @@ def _fetch_entites_from_cdap(entities, entities_detail):
   return entities, entities_detail
 
 
-def _match_authorizables(authorizables, path):
-  return True if path[:len(authorizables)] == authorizables else False
+def _match_authorizables(base_authorizables, authorizables):
+  """
+  Method to check if authorizables (entity in CDAP) is contained (the children) of base_authorizables
+  If so, base_authorizables should be exactly the same as the leading part of authorizables
+  :return: bool: True if match else False
+  """
+  return authorizables[:len(base_authorizables)] == base_authorizables
 
 
 def _to_sentry_privilege(action, authorizables):
@@ -121,19 +127,33 @@ def _sentry_authorizables_to_path(authorizables):
   return "/".join(auth[key] for auth in authorizables for key in ("type", "name"))
 
 
+def is_cdap_entity_role(role):
+  """
+  CDAP create roles for entities by default. These roles are in the format of '.namespace', '.program' etc.
+  :param role: The role to judge
+  :return: bool: if role is a cdap entity role
+  """
+  return role['name'].startswith(('.artifact', '.application', '.program', '.dataset', 'stream', '.namespace'))
+
+
 def _filter_list_roles_by_group(api):
   """
-  A helper function to filter the list_sentry_roles_by_group api from sentry
-  All the role name start with "." is generate by default in CDAP,
-   and they will not be presented to users.
+  A helper function to filter the CDAP entity roles defined in Sentry and they will not be presented to users.
   """
   roles = api.list_sentry_roles_by_group()
-  return filter(lambda item: not item["name"].startswith("."), roles)
+  return filter(lambda role: not is_cdap_entity_role(role), roles)
 
 
 def _get_privileges_for_path(user, path):
+  """
+  Get the roles that have privileges on the path. Since Sentry stores entries per principal, we have to
+  query all the data to find the matching privileges.
+  :param user: The user make the reqeust. Comes from request.user
+  :param path: The path of CDAP entitiy
+  :return: a Json object contains all the roles that have certain privileges on the entity
+  """
   api = _get_sentry_api(user)
-  roles = [result["nacme"] for result in _filter_list_roles_by_group(api)]
+  roles = [result["name"] for result in _filter_list_roles_by_group(api)]
   privileges = {}
   authorizable = _path_to_sentry_authorizables(path)
   for role in roles:
@@ -203,7 +223,7 @@ def grant_privileges(request):
   """
   Grant a list of actions to an entity. Should be a Post Method.
   :param request: POST DATA{
-    "role":role name of,
+    "role": name of role,
     "actions": a list/array of actions,
     "path": the path to entity,
   }
@@ -223,7 +243,7 @@ def revoke_privileges(request):
   """
   Revoke a list of actions to an entity. Should be a Post Method.
   :param request: POST DATA{
-    "role":role name of,
+    "role": name of role,
     "actions": a list/array of actions,
     "path": the path to entity,
   }
@@ -238,9 +258,9 @@ def revoke_privileges(request):
     tSentryPrivilege = _to_sentry_privilege(action, authorizables)
     api.alter_sentry_role_revoke_privilege(role, tSentryPrivilege)
   # Check if all the privileges are revoked successfully
-  response_msgs = [_sentry_authorizables_to_path(priv["authorizables"])
-                   for priv in api.list_sentry_privileges_by_role("cdap", role)
-                   if _match_authorizables(priv["authorizables"], authorizables)]
+  response_msgs = [_sentry_authorizables_to_path(privilege["authorizables"])
+                   for privilege in api.list_sentry_privileges_by_role("cdap", role)
+                   if _match_authorizables(privilege["authorizables"], authorizables)]
   return HttpResponse(json.dumps(response_msgs), content_type="application/json")
 
 
@@ -284,14 +304,60 @@ def list_privileges_by_group(request, group):
   api = _get_sentry_api(request.user)
   roles = _filter_list_roles_by_group(api)
 
-  # Construct a dcitionary like {groupname:[role1,role2,role3]}
+  # Construct a dictionary like {groupname:[role1,role2,role3]}
   reverse_group_role_dict = defaultdict(list)
   for role in roles:
-    for group in role["groups"]:
-      reverse_group_role_dict[group].append(role["name"])
+    for g in role["groups"]:
+      reverse_group_role_dict[g].append(role["name"])
 
-  response = [api.list_sentry_privileges_by_role("cdap", role)
-              for role in reverse_group_role_dict[group]
-              if group in reverse_group_role_dict]
+  if group in reverse_group_role_dict:
+    response = [api.list_sentry_privileges_by_role("cdap", role) for role in reverse_group_role_dict[group]]
+  else:
+    response = []
   return HttpResponse(json.dumps(response), content_type="application/json")
+
+
+@_cdap_error_handler
+def create_role(request, role_name):
+  """
+  :param role_name: The name of the role to create
+  """
+  _get_sentry_api(request.user).create_sentry_role(role_name)
+  return HttpResponse("Role %s successfully created." % role_name)
+
+
+@_cdap_error_handler
+def drop_role(request, role_name):
+  """
+  :param role_name: The name of the role to drop
+  """
+  _get_sentry_api(request.user).drop_sentry_role(role_name)
+  return HttpResponse("Role %s successfully deleted." % role_name)
+
+
+@_cdap_error_handler
+def list_all_groups(request):
+  """
+  List all groups in Django. Groups can be synced with LDAP/Unix groups with Hue's built-in group tools.
+  :return: a json array of all groups' name
+  """
+  return HttpResponse(json.dumps([group.name for group in Group.objects.all()]), content_type="application/json")
+
+
+@_cdap_error_handler
+def alter_role_by_group(request):
+  """
+  Alter the groups belonging to a role. Post data should contain the current groups of a role and this function will
+  update it in Sentry
+  :param request: Post data: {"role": role, "groups[]", [group1, group2, ...]}
+  """
+  role = request.POST.get("role")
+  post_groups = set(request.POST.getlist("groups[]"))
+  api = _get_sentry_api(request.user)
+  groups = set([item["groups"] for item in _filter_list_roles_by_group(api) if item["name"] == role][0])
+  # newly added groups
+  api.alter_sentry_role_add_groups(role, post_groups.difference(groups))
+  # deleted groups
+  api.alter_sentry_role_delete_groups(role, groups.difference(post_groups))
+  return HttpResponse("Successfully altered the role to " + str(post_groups))
 
